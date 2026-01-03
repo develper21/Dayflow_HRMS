@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Search, ChevronLeft, ChevronRight, Calendar, Clock, User } from 'lucide-react';
+import NotificationBell from '@/components/NotificationBell';
 
 interface AttendanceRecord {
   id: string;
@@ -176,6 +177,9 @@ export default function AttendancePage() {
             </div>
 
             <div className="flex items-center space-x-4">
+              <div className="relative">
+                <NotificationBell userId={user?.id || ''} />
+              </div>
               <div className="relative">
                 <input
                   type="text"
