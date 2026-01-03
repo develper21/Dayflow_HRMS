@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
-    companyName: '',
     firstName: '',
     lastName: '',
     email: '',
@@ -61,7 +60,6 @@ export default function SignupPage() {
           firstName: formData.firstName,
           lastName: formData.lastName,
           phone: formData.phone,
-          companyName: formData.companyName,
           role: formData.role,
         }),
       });
@@ -133,25 +131,6 @@ export default function SignupPage() {
                 </select>
               </div>
             </div>
-
-            {formData.role === 'employee' && (
-              <div>
-                <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">
-                  Company Name
-                </label>
-                <div className="mt-1">
-                  <input
-                    id="companyName"
-                    name="companyName"
-                    type="text"
-                    required={formData.role === 'employee'}
-                    value={formData.companyName}
-                    onChange={handleChange}
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  />
-                </div>
-              </div>
-            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div>
