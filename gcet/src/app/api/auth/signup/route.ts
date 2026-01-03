@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { hashPassword, validatePassword, generateToken, setAuthCookie } from '@/lib/auth';
-import { generateEmployeeId } from '@/lib/utils';
+import { generateUniqueEmployeeId } from '@/lib/utils';
 import { eq } from 'drizzle-orm';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, firstName, lastName, phone, companyName, role = 'employee' } = await request.json();
+    const { email, password, firstName, lastName, phone, role = 'employee' } = await request.json();
 
     if (!email || !password || !firstName || !lastName) {
       return NextResponse.json(
@@ -34,11 +34,10 @@ export async function POST(request: NextRequest) {
 
     const hashedPassword = await hashPassword(password);
     
+    // Generate employee_id only for role='employee'
     let employeeId = null;
-    if (role === 'employee' && companyName) {
-      const joiningYear = new Date().getFullYear();
-      const serialNumber = Math.floor(Math.random() * 9999) + 1;
-      employeeId = generateEmployeeId(companyName, firstName, lastName, joiningYear, serialNumber);
+    if (role === 'employee') {
+      employeeId = await generateUniqueEmployeeId();
     }
 
     const [newUser] = await db.insert(users).values({
@@ -73,7 +72,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Signup error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
