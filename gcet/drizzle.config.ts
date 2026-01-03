@@ -5,6 +5,10 @@ export default {
   out: './drizzle',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL!,
+    host: 'localhost',
+    port: 5432,
+    user: 'dayflow_user',
+    password: 'dayflow123456',
+    database: 'dayflow',
   },
 } as Config;
