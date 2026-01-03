@@ -42,6 +42,10 @@ export default function PayrollPage() {
       if (response.ok) {
         const userData = await response.json();
         setUser(userData);
+        // Redirect admin/HR users to admin view
+        if (userData.role === 'admin' || userData.role === 'hr') {
+          router.push('/payroll/admin');
+        }
       } else {
         router.push('/auth/login');
       }
