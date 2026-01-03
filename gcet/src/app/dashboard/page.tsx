@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Search, Settings, User, LogOut, Calendar, Users, Clock, DollarSign } from 'lucide-react';
+import Image from 'next/image';
+import { Search, Settings, User } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { useToastListener } from '@/hooks/useToastListener';
 import ToastDemo from '@/components/ToastDemo';
@@ -50,11 +51,7 @@ export default function Dashboard() {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/me');
       if (response.ok) {
@@ -66,14 +63,18 @@ export default function Dashboard() {
       } else {
         router.push('/auth/login');
       }
-    } catch (error) {
+    } catch {
       router.push('/auth/login');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router, fetchEmployees]);
 
-  const fetchEmployees = async () => {
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  const fetchEmployees = useCallback(async () => {
     setIsEmployeesLoading(true);
     try {
       const response = await fetch('/api/users');
@@ -81,12 +82,12 @@ export default function Dashboard() {
         const data = await response.json();
         setEmployees(data);
       }
-    } catch (error) {
+    } catch {
       // Error handling without console.log
     } finally {
       setIsEmployeesLoading(false);
     }
-  };
+  }, []);
 
   const handleCheckIn = async () => {
     try {
@@ -96,7 +97,7 @@ export default function Dashboard() {
       if (response.ok) {
         setIsCheckedIn(true);
       }
-    } catch (error) {
+    } catch {
       // Error handling without console.log
     }
   };
@@ -109,7 +110,7 @@ export default function Dashboard() {
       if (response.ok) {
         setIsCheckedIn(false);
       }
-    } catch (error) {
+    } catch {
       // Error handling without console.log
     }
   };
@@ -118,7 +119,7 @@ export default function Dashboard() {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
       router.push('/auth/login');
-    } catch (error) {
+    } catch {
       // Error handling without console.log
     }
   };
@@ -131,7 +132,6 @@ export default function Dashboard() {
     return <PageLoading message="Redirecting to login..." />;
   }
 
-  const shouldShowEmployees = user.role !== 'employee';
   const filteredEmployees = employees.filter(emp =>
     `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -220,9 +220,11 @@ export default function Dashboard() {
                 >
                   <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
                     {user.profilePictureUrl ? (
-                      <img
+                      <Image
                         src={user.profilePictureUrl}
                         alt={user.firstName}
+                        width={32}
+                        height={32}
                         className="h-8 w-8 rounded-full"
                       />
                     ) : (
@@ -283,9 +285,11 @@ export default function Dashboard() {
                       <div className="flex items-center space-x-3">
                         <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
                           {employee.profilePictureUrl ? (
-                            <img
+                            <Image
                               src={employee.profilePictureUrl}
                               alt={`${employee.firstName} ${employee.lastName}`}
+                              width={48}
+                              height={48}
                               className="h-12 w-12 rounded-full"
                             />
                           ) : (
