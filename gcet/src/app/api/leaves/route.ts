@@ -1,46 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { leaves, users } from '@/lib/db/schema';
-import { getAuthCookie, verifyToken } from '@/lib/auth';
+import { authenticateRequest, requireEmployee } from '@/lib/rbac';
 import { eq, and, gte, lte, desc } from 'drizzle-orm';
 import { createLeaveNotification } from '@/lib/notifications';
 
 export async function GET(request: NextRequest) {
   try {
-    const token = await getAuthCookie();
+    const auth = await authenticateRequest(request);
     
-    if (!token) {
+    if (auth.error) {
       return NextResponse.json(
-        { error: 'No authentication token found' },
-        { status: 401 }
+        { error: auth.error },
+        { status: auth.status }
       );
     }
 
-    const payload = verifyToken(token);
-    
-    if (!payload) {
+    const roleCheck = requireEmployee(auth.user!);
+    if (roleCheck.error) {
       return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      );
-    }
-
-    const [currentUser] = await db.select({
-      role: users.role,
-      firstName: users.first_name,
-      lastName: users.last_name,
-    }).from(users).where(eq(users.id, payload.userId)).limit(1);
-
-    if (!currentUser) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
+        { error: roleCheck.error },
+        { status: roleCheck.status }
       );
     }
 
     let leaveRecords;
     
-    if (currentUser.role === 'employee') {
+    if (auth.user!.role === 'employee') {
       leaveRecords = await db.select({
         id: leaves.id,
         user_id: leaves.user_id,
@@ -54,7 +40,7 @@ export async function GET(request: NextRequest) {
         approver_comments: leaves.approver_comments,
         created_at: leaves.created_at,
         updated_at: leaves.updated_at,
-      }).from(leaves).where(eq(leaves.user_id, payload.userId)).orderBy(desc(leaves.created_at));
+      }).from(leaves).where(eq(leaves.user_id, auth.user!.id)).orderBy(desc(leaves.created_at));
     } else {
       leaveRecords = await db.select({
         id: leaves.id,
@@ -72,7 +58,6 @@ export async function GET(request: NextRequest) {
       }).from(leaves).orderBy(desc(leaves.created_at));
     }
 
-    // Get user names for all leave records
     const leaveWithNames = await Promise.all(
       leaveRecords.map(async (leave: any) => {
         const [leaveUser] = await db.select({
@@ -98,7 +83,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(leaveWithNames);
 
   } catch (error) {
-    console.error('Get leaves error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -108,21 +92,20 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const token = await getAuthCookie();
+    const auth = await authenticateRequest(request);
     
-    if (!token) {
+    if (auth.error) {
       return NextResponse.json(
-        { error: 'No authentication token found' },
-        { status: 401 }
+        { error: auth.error },
+        { status: auth.status }
       );
     }
 
-    const payload = verifyToken(token);
-    
-    if (!payload) {
+    const roleCheck = requireEmployee(auth.user!);
+    if (roleCheck.error) {
       return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
+        { error: roleCheck.error },
+        { status: roleCheck.status }
       );
     }
 
@@ -135,13 +118,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate days count
     const start = new Date(start_date);
     const end = new Date(end_date);
     const daysCount = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-    const [newLeave] = await db.insert(leaves).values({
-      user_id: payload.userId,
+    const newLeave = await db.insert(leaves).values({
+      user_id: auth.user!.id,
       leave_type,
       start_date,
       end_date,
@@ -150,9 +132,8 @@ export async function POST(request: NextRequest) {
       status: 'pending',
     }).returning();
 
-    // Create notification for HR users
-    if (newLeave.length > 0) {
-      await createLeaveNotification(payload.userId, newLeave[0].id, 'applied');
+    if (newLeave && newLeave.length > 0) {
+      await createLeaveNotification(auth.user!.id, newLeave[0].id, 'applied');
     }
 
     return NextResponse.json({
@@ -161,7 +142,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Create leave error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
