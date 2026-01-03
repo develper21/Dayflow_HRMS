@@ -43,10 +43,20 @@ interface Document {
   downloadUrl: string;
   isShared: boolean;
   tags: string[];
+  userId?: string; // Add user ID for role-based filtering
+}
+
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  email: string;
 }
 
 export default function DocumentsPage() {
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,6 +67,20 @@ export default function DocumentsPage() {
   
   // Initialize toast listener
   useToastListener();
+
+  const fetchUser = async () => {
+    try {
+      const response = await fetch('/api/auth/me');
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+      } else {
+        router.push('/auth/login');
+      }
+    } catch {
+      router.push('/auth/login');
+    }
+  };
 
   const fetchDocuments = async () => {
     try {
@@ -73,8 +97,14 @@ export default function DocumentsPage() {
   };
 
   useEffect(() => {
-    fetchDocuments();
+    fetchUser();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchDocuments();
+    }
+  }, [user]);
 
   const handleDownload = async (documentId: string) => {
     setActionLoading(documentId);
@@ -94,15 +124,23 @@ export default function DocumentsPage() {
     
     setActionLoading(documentId);
     try {
-      // Simulate delete
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setDocuments(prev => prev.filter(doc => doc.id !== documentId));
+      const response = await fetch(`/api/documents/${documentId}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        setDocuments(prev => prev.filter(doc => doc.id !== documentId));
+      }
     } catch (error) {
       console.error('Failed to delete document:', error);
     } finally {
       setActionLoading(null);
     }
   };
+
+  const canUploadDocuments = user?.role === 'admin' || user?.role === 'hr';
+  const canDeleteDocuments = user?.role === 'admin';
+  const canViewAllDocuments = user?.role === 'admin' || user?.role === 'hr';
 
   const getFileIcon = (type: string) => {
     switch (type) {
@@ -159,10 +197,12 @@ export default function DocumentsPage() {
               <Plus className="w-4 h-4 mr-2" />
               Create Folder
             </ProButton>
+            {canUploadDocuments && (
             <ProButton onClick={() => setShowUploadModal(true)}>
               <Upload className="w-4 h-4 mr-2" />
               Upload Document
             </ProButton>
+          )}
           </div>
         </div>
 
@@ -468,6 +508,7 @@ export default function DocumentsPage() {
                               <ProButton variant="ghost" size="sm">
                                 <Edit className="w-4 h-4" />
                               </ProButton>
+                              {canDeleteDocuments && (
                               <ProButton 
                                 variant="ghost" 
                                 size="sm"
@@ -476,6 +517,7 @@ export default function DocumentsPage() {
                               >
                                 <Trash2 className="w-4 h-4" />
                               </ProButton>
+                            )}
                             </>
                           )}
                         </div>

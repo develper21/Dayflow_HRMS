@@ -14,7 +14,10 @@ import {
   TrendingUp,
   Users,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Edit,
+  Save,
+  X
 } from 'lucide-react';
 import Layout from '@/components/ui/layout';
 import { EnterpriseCard, EnterpriseCardHeader, EnterpriseCardTitle, EnterpriseCardContent } from '@/components/ui';
@@ -32,6 +35,8 @@ interface AttendanceRecord {
   workHours: string;
   extraHours: string;
   status: 'present' | 'absent' | 'half_day' | 'leave';
+  createdAt?: string;
+  updatedAt?: string;
   user?: {
     id: string;
     firstName: string;
@@ -67,6 +72,8 @@ export default function AttendancePage() {
   const [selectedView, setSelectedView] = useState<'day' | 'month'>('day');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<string | null>(null);
+  const [editStatus, setEditStatus] = useState<string>('');
 
   const fetchUser = useCallback(async () => {
     try {
@@ -110,14 +117,12 @@ export default function AttendancePage() {
       });
 
       // Add userId filter for admin view if specific employee is selected
-      if (user && user.role !== 'employee' && selectedEmployee !== 'all') {
+      if (user && (user.role === 'admin' || user.role === 'hr') && selectedEmployee !== 'all') {
         params.set('userId', selectedEmployee);
       }
 
-      // Choose the right endpoint based on user role
-      const endpoint = user && user.role !== 'employee' 
-        ? `/api/attendance?${params}`
-        : `/api/attendance/me?${params}`;
+      // Use the same endpoint for all users, API will handle role-based filtering
+      const endpoint = `/api/attendance?${params}`;
 
       const response = await fetch(endpoint);
       if (response.ok) {
@@ -137,7 +142,7 @@ export default function AttendancePage() {
 
   useEffect(() => {
     if (user) {
-      if (user.role !== 'employee') {
+      if (user.role === 'admin' || user.role === 'hr') {
         fetchEmployees();
       }
       fetchAttendance();
@@ -198,14 +203,12 @@ export default function AttendancePage() {
       }
       
       // Add user filter for HR/Admin if specific employee is selected
-      if (user && user.role !== 'employee' && selectedEmployee !== 'all') {
+      if (user && (user.role === 'admin' || user.role === 'hr') && selectedEmployee !== 'all') {
         params.set('userId', selectedEmployee);
       }
       
       // Use the appropriate export endpoint
-      const exportEndpoint = user && user.role !== 'employee' 
-        ? `/api/export/attendance?${params.toString()}`
-        : `/api/export/attendance/me?${params.toString()}`;
+      const exportEndpoint = `/api/export/attendance?${params.toString()}`;
       
       const response = await fetch(exportEndpoint);
       
@@ -227,6 +230,48 @@ export default function AttendancePage() {
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleUpdateAttendance = async (recordId: string, newStatus: string) => {
+    try {
+      setActionLoading(true);
+      
+      const response = await fetch('/api/attendance', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: recordId,
+          status: newStatus,
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh attendance data
+        await fetchAttendance();
+        setEditingRecord(null);
+        setEditStatus('');
+      }
+    } catch {
+      // Error handling without console.log
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const startEditing = (record: AttendanceRecord) => {
+    setEditingRecord(record.id);
+    setEditStatus(record.status);
+  };
+
+  const cancelEditing = () => {
+    setEditingRecord(null);
+    setEditStatus('');
+  };
+
+  const saveEdit = (recordId: string) => {
+    handleUpdateAttendance(recordId, editStatus);
   };
 
   const calculateStats = () => {
@@ -397,7 +442,7 @@ export default function AttendancePage() {
                 </div>
 
                 {/* Employee Selector for Admin/HR */}
-                {user.role !== 'employee' && (
+                {user.role === 'admin' || user.role === 'hr' ? (
                   <select
                     value={selectedEmployee}
                     onChange={(e) => setSelectedEmployee(e.target.value)}
@@ -410,7 +455,7 @@ export default function AttendancePage() {
                       </option>
                     ))}
                   </select>
-                )}
+                ) : null}
 
                 {/* View Selector */}
                 <div className="flex items-center space-x-2">
@@ -469,18 +514,19 @@ export default function AttendancePage() {
             ) : (
               <DataTable>
                 <DataTableHeader>
-                  {user.role !== 'employee' && <DataTableHeaderCell>Employee</DataTableHeaderCell>}
+                  {user.role === 'admin' || user.role === 'hr' ? <DataTableHeaderCell>Employee</DataTableHeaderCell> : null}
                   <DataTableHeaderCell>Date</DataTableHeaderCell>
                   <DataTableHeaderCell>Check In</DataTableHeaderCell>
                   <DataTableHeaderCell>Check Out</DataTableHeaderCell>
                   <DataTableHeaderCell>Work Hours</DataTableHeaderCell>
                   <DataTableHeaderCell>Extra Hours</DataTableHeaderCell>
                   <DataTableHeaderCell>Status</DataTableHeaderCell>
+                  {(user.role === 'admin' || user.role === 'hr') && <DataTableHeaderCell>Actions</DataTableHeaderCell>}
                 </DataTableHeader>
                 <DataTableBody>
                   {attendanceRecords.map((record) => (
                     <DataTableRow key={record.id} hover>
-                      {user.role !== 'employee' && (
+                      {user.role === 'admin' || user.role === 'hr' ? (
                         <DataTableCell>
                           <div className="flex items-center">
                             <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
@@ -506,7 +552,7 @@ export default function AttendancePage() {
                             </div>
                           </div>
                         </DataTableCell>
-                      )}
+                      ) : null}
                       <DataTableCell>
                         <div className="text-sm text-gray-900">
                           {new Date(record.date).toLocaleDateString('en-US', {
@@ -543,6 +589,53 @@ export default function AttendancePage() {
                           {record.status === 'present' ? 'Present' : record.status === 'leave' ? 'On Leave' : 'Absent'}
                         </StatusBadge>
                       </DataTableCell>
+                      {(user.role === 'admin' || user.role === 'hr') && (
+                        <DataTableCell>
+                          {editingRecord === record.id ? (
+                            <div className="flex items-center space-x-2">
+                              <select
+                                value={editStatus}
+                                onChange={(e) => setEditStatus(e.target.value)}
+                                className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                disabled={actionLoading}
+                              >
+                                <option value="present">Present</option>
+                                <option value="absent">Absent</option>
+                                <option value="half_day">Half Day</option>
+                                <option value="leave">Leave</option>
+                              </select>
+                              <ProButton
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => saveEdit(record.id)}
+                                loading={actionLoading}
+                                disabled={actionLoading}
+                              >
+                                <Save className="w-4 h-4" />
+                              </ProButton>
+                              <ProButton
+                                size="sm"
+                                variant="ghost"
+                                onClick={cancelEditing}
+                                disabled={actionLoading}
+                              >
+                                <X className="w-4 h-4" />
+                              </ProButton>
+                            </div>
+                          ) : (
+                            <div className="flex items-center space-x-2">
+                              <ProButton
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => startEditing(record)}
+                                disabled={actionLoading}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </ProButton>
+                            </div>
+                          )}
+                        </DataTableCell>
+                      )}
                     </DataTableRow>
                   ))}
                 </DataTableBody>
