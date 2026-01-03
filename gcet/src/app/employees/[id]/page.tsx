@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { User, Mail, Phone, Building, Users, Calendar, Edit, Briefcase } from 'lucide-react';
+import FileUpload from '@/components/FileUpload';
+import DocumentList from '@/components/DocumentList';
+import { useToastListener } from '@/hooks/useToastListener';
 
 interface EmployeeProfile {
   id: string;
@@ -49,6 +52,10 @@ export default function EmployeeProfilePage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('resume');
   const [isEditing, setIsEditing] = useState(false);
+  const [refreshDocuments, setRefreshDocuments] = useState(0);
+  
+  // Initialize toast listener
+  useToastListener();
 
   useEffect(() => {
     fetchEmployee();
@@ -81,6 +88,86 @@ export default function EmployeeProfilePage() {
       month: 'long',
       day: 'numeric',
     });
+  };
+
+  const handleProfilePictureUpload = async (file: File, fileType: string, fileName: string) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('fileType', 'profile_picture');
+      formData.append('fileName', fileName);
+
+      const response = await fetch('/api/uploads', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Trigger toast event
+        window.dispatchEvent(new CustomEvent('showToast', {
+          detail: {
+            title: 'Profile Picture Updated',
+            message: 'Your profile picture has been successfully updated.',
+            type: 'success'
+          }
+        }));
+        
+        // Refresh employee data to show new profile picture
+        fetchEmployee();
+      } else {
+        throw new Error('Failed to upload profile picture');
+      }
+    } catch (error) {
+      console.error('Profile picture upload error:', error);
+      window.dispatchEvent(new CustomEvent('showToast', {
+        detail: {
+          title: 'Upload Failed',
+          message: 'Failed to upload profile picture. Please try again.',
+          type: 'error'
+        }
+      }));
+    }
+  };
+
+  const handleDocumentUpload = async (file: File, fileType: string, fileName: string) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('fileType', fileType);
+      formData.append('fileName', fileName);
+
+      const response = await fetch('/api/uploads', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Trigger toast event
+        window.dispatchEvent(new CustomEvent('showToast', {
+          detail: {
+            title: 'Document Uploaded',
+            message: 'Your document has been successfully uploaded.',
+            type: 'success'
+          }
+        }));
+        
+        // Refresh documents list
+        setRefreshDocuments(prev => prev + 1);
+      } else {
+        throw new Error('Failed to upload document');
+      }
+    } catch (error) {
+      console.error('Document upload error:', error);
+      window.dispatchEvent(new CustomEvent('showToast', {
+        detail: {
+          title: 'Upload Failed',
+          message: 'Failed to upload document. Please try again.',
+          type: 'error'
+        }
+      }));
+    }
   };
 
   if (loading) {
@@ -179,7 +266,7 @@ export default function EmployeeProfilePage() {
                         <User className="h-10 w-10 text-gray-600" />
                       )}
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <h2 className="text-xl font-semibold text-gray-900">
                         {employee.firstName} {employee.lastName}
                       </h2>
@@ -187,6 +274,19 @@ export default function EmployeeProfilePage() {
                       <p className="text-sm text-gray-500">Login ID: {employee.employeeId || 'Not provided'}</p>
                     </div>
                   </div>
+
+                  {/* Profile Picture Upload */}
+                  {isEditing && (
+                    <div className="mb-6">
+                      <FileUpload
+                        onUploadAction={handleProfilePictureUpload}
+                        fileType="profile_picture"
+                        label="Profile Picture"
+                        acceptedTypes={['image/jpeg', 'image/png', 'image/gif']}
+                        currentFile={employee.profilePictureUrl?.split('/').pop()}
+                      />
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex items-center space-x-2">
@@ -238,7 +338,7 @@ export default function EmployeeProfilePage() {
                 {/* Tabs */}
                 <div className="border-t border-gray-200">
                   <nav className="flex space-x-8">
-                    {['resume', 'private', 'salary', 'security'].map((tab) => (
+                    {['resume', 'private', 'documents', 'salary', 'security'].map((tab) => (
                       <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
@@ -316,6 +416,33 @@ export default function EmployeeProfilePage() {
                       <div className="bg-gray-50 rounded-lg p-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">Residing Address</h3>
                         <p className="text-gray-600">{employee.address || 'Not provided'}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === 'documents' && (
+                    <div className="space-y-6">
+                      {/* Document Upload */}
+                      {isEditing && (
+                        <div className="bg-gray-50 rounded-lg p-6">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-4">Upload Document</h3>
+                          <FileUpload
+                            onUploadAction={handleDocumentUpload}
+                            fileType="document"
+                            label="Upload New Document"
+                            acceptedTypes={['image/*', '.pdf', '.doc', '.docx', '.txt']}
+                          />
+                        </div>
+                      )}
+
+                      {/* Documents List */}
+                      <div className="bg-gray-50 rounded-lg p-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Documents</h3>
+                        <DocumentList
+                          userId={employee.id}
+                          refreshTrigger={refreshDocuments}
+                          canDelete={isEditing}
+                        />
                       </div>
                     </div>
                   )}

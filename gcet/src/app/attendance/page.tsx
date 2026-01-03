@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Search, ChevronLeft, ChevronRight, Calendar, Clock, User } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Calendar, Clock, User, Download } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 
 interface AttendanceRecord {
@@ -27,15 +27,16 @@ export default function AttendancePage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(new Date());
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedView, setSelectedView] = useState<'day' | 'month'>('day');
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     fetchUser();
     fetchAttendance();
-  }, [currentDate, selectedView]);
+  }, [currentTime, selectedView]);
 
   const fetchUser = async () => {
     try {
@@ -110,6 +111,47 @@ export default function AttendancePage() {
         month: 'long',
         year: 'numeric',
       });
+    }
+  };
+
+  const handleExportAttendance = async () => {
+    try {
+      setActionLoading(true);
+      const params = new URLSearchParams();
+      
+      // Add date range if needed
+      if (selectedView === 'month') {
+        const startDate = new Date(currentTime.getFullYear(), currentTime.getMonth(), 1).toISOString().split('T')[0];
+        const endDate = new Date(currentTime.getFullYear(), currentTime.getMonth() + 1, 0).toISOString().split('T')[0];
+        params.set('startDate', startDate);
+        params.set('endDate', endDate);
+      }
+      
+      // Add user filter for HR/Admin
+      if (user && user.role !== 'employee') {
+        // For HR/Admin, you might want to export specific user data
+        // For now, export all data for current user role
+      }
+      
+      const response = await fetch(`/api/export/attendance?${params.toString()}`);
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = window.document.createElement('a') as HTMLAnchorElement;
+        link.href = url;
+        link.download = `attendance_export_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } else {
+        // Error handling without console.log
+      }
+    } catch (error) {
+      // Error handling without console.log
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -203,6 +245,28 @@ export default function AttendancePage() {
               <h1 className="text-2xl font-bold text-gray-900">
                 {user.role === 'employee' ? 'For Employees' : 'Attendance'}
               </h1>
+              
+              {/* Export Button */}
+              <button
+                onClick={handleExportAttendance}
+                disabled={actionLoading}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+              >
+                {actionLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <svg className="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" d="M4 12a8 8 0L12 20a8 8 0l-1 1-1 1-5-1-1 1-5-1-1z M12 2a8 8 0l-1 1-1 1-5-1-1 1-5-1-1z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <span>Exporting...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <Download className="h-4 w-4" />
+                    <span>Export CSV</span>
+                  </div>
+                )}
+              </button>
               
               {/* Date Navigation */}
               <div className="flex items-center space-x-4">

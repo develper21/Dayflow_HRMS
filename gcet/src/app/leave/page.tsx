@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Search, Plus, Calendar, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Search, Plus, Calendar, Clock, CheckCircle, XCircle, AlertCircle, Download } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { useToastListener } from '@/hooks/useToastListener';
+import { LoadingState, EmptyState, PageLoading } from '@/components/ui';
 
 interface LeaveRequest {
   id: string;
@@ -95,6 +96,36 @@ export default function LeavePage() {
       }
     } catch (error) {
       console.error('Failed to approve leave:', error);
+    }
+  };
+
+  const handleExportLeave = async () => {
+    try {
+      const params = new URLSearchParams();
+      
+      // Add filters if needed
+      if (user && user.role !== 'employee') {
+        // For HR/Admin, you might want to export specific user data
+        // For now, export all data for current user role
+      }
+      
+      const response = await fetch(`/api/export/leave?${params.toString()}`);
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = window.document.createElement('a') as HTMLAnchorElement;
+        link.href = url;
+        link.download = `leave_export_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } else {
+        console.error('Export failed');
+      }
+    } catch (error) {
+      console.error('Export error:', error);
     }
   };
 
@@ -254,6 +285,15 @@ export default function LeavePage() {
                     <span>NEW</span>
                   </button>
                 )}
+                
+                {/* Export Button */}
+                <button
+                  onClick={handleExportLeave}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center space-x-2"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Export CSV</span>
+                </button>
               </div>
             </div>
           </div>
