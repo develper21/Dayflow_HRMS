@@ -33,6 +33,14 @@ export async function createPayrollNotification(userId: string, payrollId: strin
   };
 
   await db.insert(notifications).values(notification);
+
+  // Return toast notification data
+  return {
+    userId,
+    title: 'Payroll Published',
+    message: 'Your payroll has been published and is now available for viewing.',
+    type: 'success'
+  };
 }
 
 export async function createApprovalNotification(userId: string, entityType: string, action: string) {
