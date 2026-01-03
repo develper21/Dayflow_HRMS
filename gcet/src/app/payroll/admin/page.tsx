@@ -259,7 +259,7 @@ export default function AdminPayrollPage() {
                     <option value="">Select Employee</option>
                     {employees.map((emp) => (
                       <option key={emp.id} value={emp.id}>
-                        {emp.first_name} {emp.last_name} ({emp.employee_id || 'No ID'})
+                        {emp.firstName} {emp.lastName} ({emp.employeeId || 'No ID'})
                       </option>
                     ))}
                   </select>
