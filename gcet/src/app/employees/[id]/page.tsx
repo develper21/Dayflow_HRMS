@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { User, Mail, Phone, Building, Users, Calendar, Edit, FileText, Briefcase, Shield, DollarSign } from 'lucide-react';
+import { User, Mail, Phone, Building, Users, Calendar, Edit, Briefcase } from 'lucide-react';
 
 interface EmployeeProfile {
   id: string;
@@ -45,7 +45,6 @@ interface EmployeeProfile {
 
 export default function EmployeeProfilePage() {
   const params = useParams();
-  const router = useRouter();
   const [employee, setEmployee] = useState<EmployeeProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('resume');
@@ -185,7 +184,7 @@ export default function EmployeeProfilePage() {
                         {employee.firstName} {employee.lastName}
                       </h2>
                       <p className="text-gray-500">{employee.jobTitle}</p>
-                      <p className="text-sm text-gray-500">Login ID: {employee.employeeId}</p>
+                      <p className="text-sm text-gray-500">Login ID: {employee.employeeId || 'Not provided'}</p>
                     </div>
                   </div>
 
