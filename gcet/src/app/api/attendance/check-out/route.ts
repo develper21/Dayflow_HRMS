@@ -1,26 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { attendance } from '@/lib/db/schema';
-import { getAuthCookie, verifyToken } from '@/lib/auth';
+import { authenticateRequest, requireEmployee } from '@/lib/rbac';
 import { eq, and } from 'drizzle-orm';
 
 export async function POST(request: NextRequest) {
   try {
-    const token = await getAuthCookie();
+    const auth = await authenticateRequest(request);
     
-    if (!token) {
+    if (auth.error) {
       return NextResponse.json(
-        { error: 'No authentication token found' },
-        { status: 401 }
+        { error: auth.error },
+        { status: auth.status }
       );
     }
 
-    const payload = verifyToken(token);
-    
-    if (!payload) {
+    const roleCheck = requireEmployee(auth.user!);
+    if (roleCheck.error) {
       return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
+        { error: roleCheck.error },
+        { status: roleCheck.status }
       );
     }
 
@@ -29,7 +28,7 @@ export async function POST(request: NextRequest) {
     const [existingAttendance] = await db.select()
       .from(attendance)
       .where(and(
-        eq(attendance.user_id, payload.userId),
+        eq(attendance.user_id, auth.user!.id),
         eq(attendance.date, today)
       ))
       .limit(1);
@@ -63,7 +62,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Check-out error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
