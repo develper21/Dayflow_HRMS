@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { UserAvatar } from '@/components/ui/user-avatar';
-import { NotificationBell } from '@/components/ui/notification-bell';
+import NotificationCenter from '@/components/NotificationCenter';
 
 function AttendanceActions() {
     const { data: session } = useSession();
@@ -175,7 +175,7 @@ export default function EmployeeDashboard() {
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <NotificationBell />
+                            <NotificationCenter />
                             <UserAvatar />
                         </div>
                     </div>
