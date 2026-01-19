@@ -51,6 +51,9 @@ model User {
   leaveRequests LeaveRequest[]
   payrolls      Payroll[]
   notifications Notification[]
+  performanceReviews PerformanceReview[]
+  trainingEnrollments TrainingEnrollment[]
+  auditLogs    AuditLog[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -229,6 +232,22 @@ model Notification {
   title     String
   message   String
   isRead    Boolean  @default(false)
+  priority  String   @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+  category  String   @default("SYSTEM") // SYSTEM, EMAIL, PUSH, SMS
+  actionUrl String?  // URL for action button
+  actionText String? // Text for action button
+  
+  // Email specific fields
+  emailSent    Boolean @default(false)
+  emailSentAt  DateTime?
+  
+  // Push notification fields
+  pushSent     Boolean @default(false)
+  pushSentAt   DateTime?
+  
+  // SMS fields
+  smsSent      Boolean @default(false)
+  smsSentAt    DateTime?
 
   createdAt DateTime @default(now())
 
@@ -247,4 +266,161 @@ model CompanySettings {
 
   @@unique([companyId, year])
   @@map("company_settings")
+}
+
+// Performance Review System
+model PerformanceReview {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  reviewPeriod String  // Q1-2024, ANNUAL-2024, etc.
+  reviewType    String  // QUARTERLY, ANNUAL, PROBATION
+  
+  // Performance ratings (1-5 scale)
+  qualityRating       Float?
+  quantityRating      Float?
+  teamworkRating      Float?
+  initiativeRating    Float?
+  attendanceRating    Float?
+  overallRating       Float?
+  
+  strengths     String?
+  weaknesses    String?
+  goals         String?
+  recommendations String?
+  employeeComments String?
+  
+  status        String   @default("DRAFT") // DRAFT, SUBMITTED, APPROVED, REJECTED
+  reviewedBy    String?  // Manager ID
+  reviewedAt    DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("performance_reviews")
+}
+
+// Training Management
+model Training {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  category    String?  // TECHNICAL, SOFT_SKILLS, COMPLIANCE, SAFETY
+  duration    Int?     // in hours
+  cost        Float?
+  instructor  String?
+  startDate   DateTime?
+  endDate     DateTime?
+  status      String   @default("PLANNED") // PLANNED, ONGOING, COMPLETED, CANCELLED
+  
+  enrollments TrainingEnrollment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("trainings")
+}
+
+model TrainingEnrollment {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainingId String
+  training   Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  
+  status     String   @default("ENROLLED") // ENROLLED, IN_PROGRESS, COMPLETED, DROPPED
+  progress   Float    @default(0) // 0-100 percentage
+  score      Float?   // Final score if applicable
+  certificateUrl String?
+  
+  enrolledAt DateTime @default(now())
+  completedAt DateTime?
+
+  @@unique([userId, trainingId])
+  @@map("training_enrollments")
+}
+
+// Recruitment System
+model JobPosting {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  department  String?
+  location    String?
+  employmentType String? // FULL_TIME, PART_TIME, CONTRACT, INTERNSHIP
+  experienceLevel String? // ENTRY, MID, SENIOR, LEAD
+  salaryRange String?
+  status      String   @default("ACTIVE") // ACTIVE, CLOSED, DRAFT
+  
+  postedBy    String   // HR/Admin ID
+  postedAt    DateTime @default(now())
+  deadline    DateTime?
+  
+  applications JobApplication[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("job_postings")
+}
+
+model JobApplication {
+  id          String   @id @default(cuid())
+  jobPostingId String
+  jobPosting  JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  
+  name        String
+  email       String
+  phone       String?
+  resumeUrl   String?
+  coverLetter String?
+  
+  status      String   @default("APPLIED") // APPLIED, SCREENING, INTERVIEW, OFFER, REJECTED
+  notes       String?
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("job_applications")
+}
+
+// Audit Logs for Security
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  
+  action    String   // LOGIN, LOGOUT, CREATE, UPDATE, DELETE, VIEW
+  resource  String   // USER, PAYROLL, LEAVE_REQUEST, etc.
+  resourceId String?
+  
+  ipAddress String?
+  userAgent String?
+  details   String?  // JSON string with additional details
+  
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+// Reports System
+model Report {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // ATTENDANCE, PAYROLL, LEAVE, PERFORMANCE, CUSTOM
+  parameters  String?  // JSON string with report parameters
+  format      String   // PDF, EXCEL, CSV
+  status      String   @default("GENERATING") // GENERATING, COMPLETED, FAILED
+  
+  generatedBy String
+  fileUrl     String?
+  fileSize    Int?     // in bytes
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("reports")
 }
