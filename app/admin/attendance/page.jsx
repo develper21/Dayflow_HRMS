@@ -138,7 +138,7 @@ export default function AdminAttendancePage() {
                                             <td className="px-8 py-5 border-r border-black">
                                                 <div className="flex flex-col">
                                                     <span className="font-black text-black italic">[{record.user?.name}]</span>
-                                                    <span className="text-[8px] font-mono text-gray-400 mt-1 uppercase mt-1">{record.user?.employeeId}</span>
+                                                    <span className="text-[8px] font-mono text-gray-400 mt-1 uppercase">{record.user?.employeeId}</span>
                                                 </div>
                                             </td>
                                             <td className="px-8 py-5 border-r border-black font-mono font-bold text-blue-600 italic">

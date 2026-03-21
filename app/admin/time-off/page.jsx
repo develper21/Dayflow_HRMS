@@ -179,7 +179,7 @@ export default function AdminTimeOffPage() {
                                             <tr key={leave.id} className="hover:bg-gray-50 transition-colors group">
                                                 <td className="px-6 py-5 border-r border-black font-black text-black italic bg-gray-50/30">
                                                     [{leave.user?.name}]
-                                                    <p className="text-[8px] font-mono text-gray-400 mt-1 uppercase mt-1">{leave.user?.employeeId}</p>
+                                                    <p className="text-[8px] font-mono text-gray-400 mt-1 uppercase">{leave.user?.employeeId}</p>
                                                 </td>
                                                 <td className="px-6 py-5 border-r border-black font-mono font-bold">{new Date(leave.startDate).toLocaleDateString('en-GB')}</td>
                                                 <td className="px-6 py-5 border-r border-black font-mono font-bold">{new Date(leave.endDate).toLocaleDateString('en-GB')}</td>

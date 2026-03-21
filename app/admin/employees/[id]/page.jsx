@@ -175,7 +175,7 @@ export default function EmployeeDetailPage() {
                                     ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
                                     }`}>
                                     <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-1">REAL_TIME_STATE</p>
-                                    <p className="text-lg font-black italic uppercase italic">
+                                    <p className="text-lg font-black italic uppercase">
                                         {employee.attendance?.some(a => new Date(a.date).toDateString() === new Date().toDateString()) ? 'AUTHENTICATED' : 'DISCONNECTED'}
                                     </p>
                                 </div>
