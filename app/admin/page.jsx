@@ -6,8 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { EmployeeCard } from '@/components/admin/employee-card';
 import { Button } from '@/components/ui/button';
-import { UserAvatar } from '@/components/ui/user-avatar';
-import { NotificationBell } from '@/components/ui/notification-bell';
+import { AdminSidebar } from '@/components/admin/admin-sidebar';
 
 export default function AdminDashboard() {
     const { data: session } = useSession();
@@ -57,59 +56,16 @@ export default function AdminDashboard() {
     );
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-            {/* Lined Top Navigation */}
-            <nav className="bg-white border-b border-black">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-20">
-                        <div className="flex items-center gap-12">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 border border-black flex items-center justify-center overflow-hidden bg-white font-black text-xs uppercase">
-                                    {session?.user?.companyLogo ? (
-                                        <img src={session.user.companyLogo} alt="Logo" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <span className="text-black font-black italic">LOGO</span>
-                                    )}
-                                </div>
-                                <div>
-                                    <h1 className="text-2xl font-black text-black tracking-tighter uppercase leading-none">
-                                        Dayflow
-                                    </h1>
-                                    <p className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-[0.2em] mt-1">
-                                        ADMIN CONTROL PORTAL
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="flex border border-black bg-white overflow-hidden shadow-[2px_2px_0_0_#000]">
-                                <Link href="/admin" className="px-8 py-3 text-[10px] font-black uppercase tracking-widest text-white bg-black hover:bg-gray-900 transition-colors">
-                                    Employees
-                                </Link>
-                                <Link href="/admin/attendance" className="px-8 py-3 text-[10px] font-black uppercase tracking-widest text-black border-r border-black hover:bg-gray-100 transition-colors">
-                                    Attendance
-                                </Link>
-                                <Link href="/admin/time-off" className="px-8 py-3 text-[10px] font-black uppercase tracking-widest text-black border-r border-black hover:bg-gray-100 transition-colors">
-                                    Time Off
-                                </Link>
-                                <Link href="/admin/payroll" className="px-8 py-3 text-[10px] font-black uppercase tracking-widest text-black border-r border-black hover:bg-gray-100 transition-colors">
-                                    Payroll
-                                </Link>
-                                <Link href="/admin/reports" className="px-8 py-3 text-[10px] font-black uppercase tracking-widest text-black hover:bg-gray-100 transition-colors">
-                                    Reports
-                                </Link>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                            <NotificationBell />
-                            <UserAvatar />
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="min-h-screen flex">
+            <AdminSidebar />
+            <main className="flex-1 ml-64 p-8" style={{
+                backgroundImage: `
+                    linear-gradient(to right, #e5e5e5 1px, transparent 1px),
+                    linear-gradient(to bottom, #e5e5e5 1px, transparent 1px)
+                `,
+                backgroundSize: '40px 40px',
+                backgroundColor: '#fafafa'
+            }}>
                 {/* Header with Stats */}
                 <div className="mb-10">
                     <h2 className="text-[10px] font-black text-gray-400 mb-6 uppercase tracking-[0.3em] font-mono italic">HUB_CONTROL / WORKFORCE_OVERVIEW</h2>
