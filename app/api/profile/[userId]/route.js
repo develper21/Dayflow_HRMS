@@ -20,6 +20,11 @@ const updateProfileSchema = z.object({
     department: z.string().optional(),
     manager: z.string().optional(),
     workLocation: z.string().optional(),
+    panNumber: z.string().optional(),
+    uanNumber: z.string().optional(),
+    bankName: z.string().optional(),
+    accountNumber: z.string().optional(),
+    ifscCode: z.string().optional(),
 });
 
 export async function GET(request, { params }) {
@@ -30,7 +35,7 @@ export async function GET(request, { params }) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const userId = params.userId;
+        const userId = (await params).userId;
 
         // Check access: Employee can only view own profile, Admin can view any
         if (session.user.role !== 'ADMIN' && session.user.id !== userId) {
@@ -82,7 +87,7 @@ export async function PUT(request, { params }) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const userId = params.userId;
+        const userId = (await params).userId;
         const isAdmin = session.user.role === 'ADMIN';
 
         // Check access: Employee can only edit own profile, Admin can edit any
@@ -125,6 +130,11 @@ export async function PUT(request, { params }) {
             about: validatedData.about || null,
             jobLoves: validatedData.jobLoves || null,
             interestsHobbies: validatedData.interestsHobbies || null,
+            panNumber: validatedData.panNumber || null,
+            uanNumber: validatedData.uanNumber || null,
+            bankName: validatedData.bankName || null,
+            accountNumber: validatedData.accountNumber || null,
+            ifscCode: validatedData.ifscCode || null,
         };
 
         await prisma.employeeProfile.upsert({
