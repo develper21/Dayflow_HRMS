@@ -104,375 +104,369 @@ export function SalaryCalculator({ employeeId, initialSalary }) {
     };
 
     return (
-        <div className="space-y-6">
-            {/* Important Notice */}
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-                <div className="flex">
+        <div className="space-y-8">
+            {/* Important Notice - Brutalist Style */}
+            <div className="border-2 border-black bg-yellow-50 p-6 shadow-[4px_4px_0_0_#000]">
+                <div className="flex items-start gap-4">
                     <div className="flex-shrink-0">
-                        <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
+                        <div className="w-8 h-8 border-2 border-black bg-yellow-400 flex items-center justify-center">
+                            <span className="text-black font-black text-lg">!</span>
+                        </div>
                     </div>
-                    <div className="ml-3">
-                        <h3 className="text-sm font-medium text-yellow-800">Important</h3>
-                        <div className="mt-2 text-sm text-yellow-700 space-y-2">
-                            <p>The Salary Information tab allows users to define and manage all salary-related details for an employee, including wage type, working schedule, salary components, benefits. Salary components should be calculated automatically based on the defined Wage.</p>
-
-                            <p className="font-semibold mt-3">Wage Type:</p>
-                            <p>- Fixed Wage</p>
-
-                            <p className="font-semibold mt-3">- Salary Components:</p>
-                            <p>Section where users can define salary structure components.</p>
-
-                            <p className="mt-2">Each component should include:</p>
-                            <p>Basic, House Rent Allowance, Standard Allowance, Performance Bonus, Leave Travel Allowance, Fixed Allowance</p>
-
-                            <p className="font-semibold mt-3">Computation Type: Fixed Amount or Percentage of Wage</p>
-                            <p>Value: Percentage field (e.g., 50% for Basic, 50% of Basic for HRA, Standard Allowance ₹167, Performance Bonus 8.33%, Leave Travel Allowance 8.333%, Fixed allowance is % wage - total of all the component)</p>
-
-                            <p className="mt-2">Salary component values should auto-update when the wage amount changes. The total of all components should not exceed the defined Wage.</p>
-
-                            <p className="font-semibold mt-3">- Automatic Calculation:</p>
-                            <p>The system should calculate each component amount based on the employee's defined wage.</p>
-
-                            <p className="font-semibold mt-3">Example:</p>
-                            <p>If Wage = ₹50,000 and Basic = 50% of wage, then Basic = ₹25,000.</p>
-                            <p>If HRA = 50% of Basic, then HRA = ₹12,500.</p>
-
-                            <p className="mt-2">Each fields for configuration (e.g., PF rate 12%).</p>
-                            <p>and Professional Tax 200</p>
+                    <div>
+                        <h3 className="text-[10px] font-black text-black uppercase tracking-[0.3em] mb-3 font-mono italic">SYSTEM_PROTOCOL // FINANCIAL_NODES</h3>
+                        <div className="text-[9px] font-mono font-bold text-gray-700 space-y-2 leading-relaxed">
+                            <p>WAGE_TYPE: FIXED_WAGE // AUTO_CALCULATION_ENABLED</p>
+                            <p>COMPONENTS: BASIC, HRA, STANDARD_ALLOWANCE, PERFORMANCE_BONUS, LTA, FIXED_ALLOWANCE</p>
+                            <p>PF_RATE: 12% // PROFESSIONAL_TAX: 200</p>
+                            <p className="italic text-gray-500">ALL_VALUES_AUTO_UPDATE_ON_WAGE_CHANGE</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Wage Information */}
-            <div className="bg-white border rounded-lg p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Wage Information</h3>
-                <div className="grid grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Wage Type</label>
+            {/* Wage Information - Brutalist Style */}
+            <div className="border-2 border-black bg-white p-8 shadow-[8px_8px_0_0_#000]">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="w-2 h-8 bg-black"></div>
+                    <h3 className="text-[10px] font-black text-black uppercase tracking-[0.4em] font-mono italic">WAGE_CONFIGURATION</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="border border-black p-4 bg-gray-50/50">
+                        <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2 block">WAGE_TYPE</label>
                         <input
                             type="text"
                             value={salaryData.wageType}
                             disabled
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                            className="w-full px-4 py-3 border-2 border-black bg-gray-100 text-[10px] font-black uppercase tracking-widest font-mono"
                         />
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Working Days Per Week</label>
+                    <div className="border border-black p-4 bg-gray-50/50">
+                        <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2 block">WORKING_DAYS_PER_WEEK</label>
                         <input
                             type="number"
                             value={salaryData.workingDaysPerWeek}
                             onChange={(e) => setSalaryData({ ...salaryData, workingDaysPerWeek: parseInt(e.target.value) })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                            className="w-full px-4 py-3 border-2 border-black text-[10px] font-black uppercase tracking-widest font-mono focus:shadow-[2px_2px_0_0_#000] transition-all"
                         />
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Monthly Wage (₹)</label>
+                    <div className="border border-black p-4 bg-gray-50/50">
+                        <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2 block">MONTHLY_WAGE [₹]</label>
                         <input
                             type="number"
                             value={salaryData.monthlyWage}
                             onChange={(e) => setSalaryData({ ...salaryData, monthlyWage: parseFloat(e.target.value) || 0 })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 font-bold text-lg"
+                            className="w-full px-4 py-3 border-2 border-black text-lg font-black uppercase tracking-widest font-mono focus:shadow-[2px_2px_0_0_#000] transition-all"
                             placeholder="50000"
                         />
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Yearly Wage (₹)</label>
+                    <div className="border border-black p-4 bg-gray-50/50">
+                        <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2 block">YEARLY_WAGE [₹] // AUTO_CALC</label>
                         <input
                             type="number"
                             value={salaryData.yearlyWage}
                             disabled
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-bold text-lg text-primary-600"
+                            className="w-full px-4 py-3 border-2 border-black bg-gray-100 text-lg font-black text-green-600 uppercase tracking-widest font-mono"
                         />
-                        <p className="text-xs text-gray-500 mt-1">Auto-calculated: Monthly × 12</p>
+                        <p className="text-[7px] font-mono font-bold text-gray-400 uppercase tracking-widest mt-1">FORMULA: MONTHLY × 12</p>
                     </div>
                 </div>
             </div>
 
-            {/* Salary Components */}
-            <div className="bg-white border rounded-lg p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Salary Components</h3>
-                <div className="space-y-4">
+            {/* Salary Components - Brutalist Style */}
+            <div className="border-2 border-black bg-white p-8 shadow-[8px_8px_0_0_#0064ff]">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="w-2 h-8 bg-blue-600"></div>
+                    <h3 className="text-[10px] font-black text-black uppercase tracking-[0.4em] font-mono italic">SALARY_COMPONENTS</h3>
+                </div>
+                <div className="space-y-6">
                     {/* Basic Salary */}
-                    <div className="grid grid-cols-4 gap-4 items-end pb-4 border-b">
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700">Basic Salary</label>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end pb-6 border-b-2 border-black">
+                        <div className="md:col-span-2">
+                            <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2 block">BASIC_SALARY</label>
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Percentage</label>
+                            <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">PERCENTAGE [%]</label>
                             <div className="flex items-center gap-2">
                                 <input
                                     type="number"
                                     value={salaryData.basicSalaryPercent}
                                     onChange={(e) => setSalaryData({ ...salaryData, basicSalaryPercent: parseFloat(e.target.value) || 0 })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                                    className="w-full px-3 py-2 border-2 border-black text-[9px] font-black uppercase tracking-widest font-mono focus:shadow-[2px_2px_0_0_#000] transition-all"
                                     placeholder="50"
                                 />
-                                <span className="text-gray-600">%</span>
+                                <span className="text-[8px] font-black text-gray-400 font-mono">%</span>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Amount</label>
+                            <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">AMOUNT [₹]</label>
                             <input
                                 type="number"
                                 value={salaryData.basicSalary.toFixed(2)}
                                 disabled
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-green-50 font-medium text-green-700"
+                                className="w-full px-3 py-2 border-2 border-black bg-green-100 text-[9px] font-black text-green-700 uppercase tracking-widest font-mono"
                             />
                         </div>
                     </div>
 
                     {/* HRA */}
-                    <div className="grid grid-cols-4 gap-4 items-end pb-4 border-b">
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700">House Rent Allowance (HRA)</label>
-                            <p className="text-xs text-gray-500">50% of Basic</p>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end pb-6 border-b-2 border-black">
+                        <div className="md:col-span-2">
+                            <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2 block">HOUSE_RENT_ALLOWANCE [HRA]</label>
+                            <p className="text-[7px] font-mono font-bold text-gray-500 uppercase">50% OF BASIC</p>
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Percentage of Basic</label>
+                            <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">PERCENTAGE [%]</label>
                             <div className="flex items-center gap-2">
                                 <input
                                     type="number"
                                     value={salaryData.hraPercent}
                                     onChange={(e) => setSalaryData({ ...salaryData, hraPercent: parseFloat(e.target.value) || 0 })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                                    className="w-full px-3 py-2 border-2 border-black text-[9px] font-black uppercase tracking-widest font-mono focus:shadow-[2px_2px_0_0_#000] transition-all"
                                     placeholder="50"
                                 />
-                                <span className="text-gray-600">%</span>
+                                <span className="text-[8px] font-black text-gray-400 font-mono">%</span>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Amount</label>
+                            <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">AMOUNT [₹]</label>
                             <input
                                 type="number"
                                 value={salaryData.houseRentAllowance.toFixed(2)}
                                 disabled
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-green-50 font-medium text-green-700"
+                                className="w-full px-3 py-2 border-2 border-black bg-green-100 text-[9px] font-black text-green-700 uppercase tracking-widest font-mono"
                             />
                         </div>
                     </div>
 
                     {/* Standard Allowance */}
-                    <div className="grid grid-cols-4 gap-4 items-end pb-4 border-b">
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700">Standard Allowance</label>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end pb-6 border-b-2 border-black">
+                        <div className="md:col-span-2">
+                            <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2 block">STANDARD_ALLOWANCE</label>
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Fixed Amount</label>
+                            <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">FIXED_AMOUNT [₹]</label>
                             <input
                                 type="number"
                                 value={salaryData.standardAllowance}
                                 onChange={(e) => setSalaryData({ ...salaryData, standardAllowance: parseFloat(e.target.value) || 0 })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                                className="w-full px-3 py-2 border-2 border-black text-[9px] font-black uppercase tracking-widest font-mono focus:shadow-[2px_2px_0_0_#000] transition-all"
                                 placeholder="167"
                             />
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Amount</label>
+                            <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">AMOUNT [₹]</label>
                             <input
                                 type="number"
                                 value={salaryData.standardAllowance}
                                 disabled
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-green-50 font-medium text-green-700"
+                                className="w-full px-3 py-2 border-2 border-black bg-green-100 text-[9px] font-black text-green-700 uppercase tracking-widest font-mono"
                             />
                         </div>
                     </div>
 
                     {/* Performance Bonus */}
-                    <div className="grid grid-cols-4 gap-4 items-end pb-4 border-b">
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700">Performance Bonus</label>
-                            <p className="text-xs text-gray-500">8.33% of Wage</p>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end pb-6 border-b-2 border-black">
+                        <div className="md:col-span-2">
+                            <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2 block">PERFORMANCE_BONUS</label>
+                            <p className="text-[7px] font-mono font-bold text-gray-500 uppercase">8.33% OF WAGE</p>
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Percentage</label>
+                            <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">PERCENTAGE [%]</label>
                             <div className="flex items-center gap-2">
                                 <input
                                     type="number"
                                     step="0.01"
                                     value={salaryData.performanceBonusPercent}
                                     onChange={(e) => setSalaryData({ ...salaryData, performanceBonusPercent: parseFloat(e.target.value) || 0 })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                                    className="w-full px-3 py-2 border-2 border-black text-[9px] font-black uppercase tracking-widest font-mono focus:shadow-[2px_2px_0_0_#000] transition-all"
                                     placeholder="8.33"
                                 />
-                                <span className="text-gray-600">%</span>
+                                <span className="text-[8px] font-black text-gray-400 font-mono">%</span>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Amount</label>
+                            <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">AMOUNT [₹]</label>
                             <input
                                 type="number"
                                 value={salaryData.performanceBonus.toFixed(2)}
                                 disabled
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-green-50 font-medium text-green-700"
+                                className="w-full px-3 py-2 border-2 border-black bg-green-100 text-[9px] font-black text-green-700 uppercase tracking-widest font-mono"
                             />
                         </div>
                     </div>
 
                     {/* Leave Travel Allowance */}
-                    <div className="grid grid-cols-4 gap-4 items-end pb-4 border-b">
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700">Leave Travel Allowance</label>
-                            <p className="text-xs text-gray-500">8.333% of Wage</p>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end pb-6 border-b-2 border-black">
+                        <div className="md:col-span-2">
+                            <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2 block">LEAVE_TRAVEL_ALLOWANCE [LTA]</label>
+                            <p className="text-[7px] font-mono font-bold text-gray-500 uppercase">8.333% OF WAGE</p>
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Percentage</label>
+                            <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">PERCENTAGE [%]</label>
                             <div className="flex items-center gap-2">
                                 <input
                                     type="number"
                                     step="0.01"
                                     value={salaryData.ltaPercent}
                                     onChange={(e) => setSalaryData({ ...salaryData, ltaPercent: parseFloat(e.target.value) || 0 })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                                    className="w-full px-3 py-2 border-2 border-black text-[9px] font-black uppercase tracking-widest font-mono focus:shadow-[2px_2px_0_0_#000] transition-all"
                                     placeholder="8.333"
                                 />
-                                <span className="text-gray-600">%</span>
+                                <span className="text-[8px] font-black text-gray-400 font-mono">%</span>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Amount</label>
+                            <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">AMOUNT [₹]</label>
                             <input
                                 type="number"
                                 value={salaryData.leaveTravelAllowance.toFixed(2)}
                                 disabled
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-green-50 font-medium text-green-700"
+                                className="w-full px-3 py-2 border-2 border-black bg-green-100 text-[9px] font-black text-green-700 uppercase tracking-widest font-mono"
                             />
                         </div>
                     </div>
 
                     {/* Fixed Allowance */}
-                    <div className="grid grid-cols-4 gap-4 items-end pb-4 border-b">
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700">Fixed Allowance</label>
-                            <p className="text-xs text-gray-500">Remaining amount</p>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end pb-6 border-b-2 border-black">
+                        <div className="md:col-span-2">
+                            <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2 block">FIXED_ALLOWANCE</label>
+                            <p className="text-[7px] font-mono font-bold text-gray-500 uppercase">REMAINING_AMOUNT</p>
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Fixed Amount</label>
+                            <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">FIXED_AMOUNT [₹]</label>
                             <input
                                 type="number"
                                 value={salaryData.fuelAllowance}
                                 onChange={(e) => setSalaryData({ ...salaryData, fuelAllowance: parseFloat(e.target.value) || 0 })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                                className="w-full px-3 py-2 border-2 border-black text-[9px] font-black uppercase tracking-widest font-mono focus:shadow-[2px_2px_0_0_#000] transition-all"
                             />
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Amount</label>
+                            <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">AMOUNT [₹]</label>
                             <input
                                 type="number"
                                 value={salaryData.fuelAllowance}
                                 disabled
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-green-50 font-medium text-green-700"
+                                className="w-full px-3 py-2 border-2 border-black bg-green-100 text-[9px] font-black text-green-700 uppercase tracking-widest font-mono"
                             />
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* PF Contribution */}
-            <div className="bg-white border rounded-lg p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Provident Fund (PF) Contribution</h3>
-                <div className="space-y-4">
+            {/* PF Contribution - Brutalist Style */}
+            <div className="border-2 border-black bg-white p-8 shadow-[8px_8px_0_0_#ef4444]">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="w-2 h-8 bg-red-600"></div>
+                    <h3 className="text-[10px] font-black text-black uppercase tracking-[0.4em] font-mono italic">PROVIDENT_FUND [PF]_CONTRIBUTION</h3>
+                </div>
+                <div className="space-y-6">
                     {/* Employee PF */}
-                    <div className="grid grid-cols-4 gap-4 items-end pb-4 border-b">
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700">Employee PF</label>
-                            <p className="text-xs text-gray-500">12% of Basic</p>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end pb-6 border-b-2 border-black">
+                        <div className="md:col-span-2">
+                            <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2 block">EMPLOYEE_PF</label>
+                            <p className="text-[7px] font-mono font-bold text-gray-500 uppercase">12% OF BASIC</p>
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Percentage</label>
+                            <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">PERCENTAGE [%]</label>
                             <div className="flex items-center gap-2">
                                 <input
                                     type="number"
                                     value={salaryData.employeePFPercent}
                                     onChange={(e) => setSalaryData({ ...salaryData, employeePFPercent: parseFloat(e.target.value) || 0 })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                                    className="w-full px-3 py-2 border-2 border-black text-[9px] font-black uppercase tracking-widest font-mono focus:shadow-[2px_2px_0_0_#000] transition-all"
                                     placeholder="12"
                                 />
-                                <span className="text-gray-600">%</span>
+                                <span className="text-[8px] font-black text-gray-400 font-mono">%</span>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Amount</label>
+                            <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">AMOUNT [₹]</label>
                             <input
                                 type="number"
                                 value={salaryData.employeePF.toFixed(2)}
                                 disabled
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-red-50 font-medium text-red-700"
+                                className="w-full px-3 py-2 border-2 border-black bg-red-100 text-[9px] font-black text-red-700 uppercase tracking-widest font-mono"
                             />
                         </div>
                     </div>
 
                     {/* Employer PF */}
-                    <div className="grid grid-cols-4 gap-4 items-end pb-4 border-b">
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700">Employer PF</label>
-                            <p className="text-xs text-gray-500">12% of Basic</p>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end pb-6 border-b-2 border-black">
+                        <div className="md:col-span-2">
+                            <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2 block">EMPLOYER_PF</label>
+                            <p className="text-[7px] font-mono font-bold text-gray-500 uppercase">12% OF BASIC</p>
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Percentage</label>
+                            <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">PERCENTAGE [%]</label>
                             <div className="flex items-center gap-2">
                                 <input
                                     type="number"
                                     value={salaryData.employerPFPercent}
                                     onChange={(e) => setSalaryData({ ...salaryData, employerPFPercent: parseFloat(e.target.value) || 0 })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                                    className="w-full px-3 py-2 border-2 border-black text-[9px] font-black uppercase tracking-widest font-mono focus:shadow-[2px_2px_0_0_#000] transition-all"
                                     placeholder="12"
                                 />
-                                <span className="text-gray-600">%</span>
+                                <span className="text-[8px] font-black text-gray-400 font-mono">%</span>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs text-gray-500 mb-1">Amount</label>
+                            <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">AMOUNT [₹]</label>
                             <input
                                 type="number"
                                 value={salaryData.employerPF.toFixed(2)}
                                 disabled
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-red-50 font-medium text-red-700"
+                                className="w-full px-3 py-2 border-2 border-black bg-red-100 text-[9px] font-black text-red-700 uppercase tracking-widest font-mono"
                             />
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Tax Deductions */}
-            <div className="bg-white border rounded-lg p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Tax Deductions</h3>
-                <div className="grid grid-cols-4 gap-4 items-end">
-                    <div className="col-span-2">
-                        <label className="block text-sm font-medium text-gray-700">Professional Tax</label>
+            {/* Tax Deductions - Brutalist Style */}
+            <div className="border-2 border-black bg-white p-8 shadow-[8px_8px_0_0_#000]">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="w-2 h-8 bg-black"></div>
+                    <h3 className="text-[10px] font-black text-black uppercase tracking-[0.4em] font-mono italic">TAX_DEDUCTIONS</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div className="md:col-span-2">
+                        <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2 block">PROFESSIONAL_TAX</label>
                     </div>
                     <div>
-                        <label className="block text-xs text-gray-500 mb-1">Fixed Amount</label>
+                        <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">FIXED_AMOUNT [₹]</label>
                         <input
                             type="number"
                             value={salaryData.professionalTax}
                             onChange={(e) => setSalaryData({ ...salaryData, professionalTax: parseFloat(e.target.value) || 0 })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                            className="w-full px-3 py-2 border-2 border-black text-[9px] font-black uppercase tracking-widest font-mono focus:shadow-[2px_2px_0_0_#000] transition-all"
                             placeholder="200"
                         />
                     </div>
                     <div>
-                        <label className="block text-xs text-gray-500 mb-1">Amount</label>
+                        <label className="text-[7px] font-black text-gray-400 uppercase tracking-widest font-mono mb-1 block">AMOUNT [₹]</label>
                         <input
                             type="number"
                             value={salaryData.professionalTax}
                             disabled
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-red-50 font-medium text-red-700"
+                            className="w-full px-3 py-2 border-2 border-black bg-red-100 text-[9px] font-black text-red-700 uppercase tracking-widest font-mono"
                         />
                     </div>
                 </div>
             </div>
 
-            {/* Save Button */}
+            {/* Save Button - Brutalist Style */}
             <div className="flex justify-end">
                 <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                    className="px-10 py-4 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] border-2 border-black shadow-[6px_6px_0_0_#0064ff] hover:shadow-none transition-all flex items-center gap-3 active:translate-x-1 active:translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {saving ? 'Saving...' : 'Save Salary Structure'}
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                    {saving ? 'SAVING_DATA...' : 'SAVE_SALARY_STRUCTURE'}
                 </button>
             </div>
         </div>
