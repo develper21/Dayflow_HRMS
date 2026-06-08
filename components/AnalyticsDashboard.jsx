@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Users, Calendar, DollarSign, Award, Briefcase, Download, Filter } from 'lucide-react';
+import { Users, Calendar, DollarSign, Award, Download, Plus } from 'lucide-react';
 
 const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
@@ -29,29 +29,39 @@ export default function AnalyticsDashboard() {
     }
   };
 
-  const StatCard = ({ title, value, icon: Icon, trend, color = 'blue' }) => (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
-          {trend && (
-            <p className={`text-sm mt-1 ${trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {trend > 0 ? '+' : ''}{trend}% from last period
-            </p>
-          )}
-        </div>
-        <div className={`p-3 rounded-lg bg-${color}-100`}>
-          <Icon className={`w-6 h-6 text-${color}-600`} />
+  const StatCard = ({ title, value, icon: Icon, trend, color = 'blue' }) => {
+    const colorClasses = {
+      blue: 'bg-blue-500',
+      green: 'bg-green-500',
+      yellow: 'bg-yellow-400',
+      purple: 'bg-purple-500'
+    };
+
+    return (
+      <div className="border-2 border-black bg-white shadow-[4px_4px_0_0_#000] p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] font-mono mb-1">{title}</p>
+            <p className="text-3xl font-black text-black font-mono uppercase">{value}</p>
+            {trend && (
+              <p className={`text-[8px] font-black mt-2 uppercase tracking-widest font-mono ${trend > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                {trend > 0 ? '+' : ''}{trend}% FROM_LAST_PERIOD
+              </p>
+            )}
+          </div>
+          <div className={`p-3 border-2 border-black ${colorClasses[color] || colorClasses.blue} text-white`}>
+            {Icon && <Icon className="w-6 h-6" />}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="inline-block w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+        <p className="ml-4 text-gray-600 font-mono font-black uppercase tracking-widest">LOADING_ANALYTICS_DATA...</p>
       </div>
     );
   }
@@ -59,7 +69,7 @@ export default function AnalyticsDashboard() {
   if (!data) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">No analytics data available</p>
+        <p className="text-gray-500 font-mono font-black uppercase tracking-widest">ERROR: NO_ANALYTICS_DATA_AVAILABLE</p>
       </div>
     );
   }
@@ -95,27 +105,27 @@ export default function AnalyticsDashboard() {
     })) : [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
-          <p className="text-gray-600 mt-1">Comprehensive insights into your HR metrics</p>
+          <h2 className="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-[0.3em] font-mono italic">DATA_VISUALIZATION_MODULE</h2>
+          <h1 className="text-4xl font-black text-black uppercase tracking-tight italic underline underline-offset-8 decoration-4 decoration-blue-500">Analytics Management</h1>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-4">
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="px-6 py-3 border-2 border-black text-[10px] font-black uppercase tracking-widest bg-white outline-none cursor-pointer font-mono"
           >
-            <option value="weekly">Last Week</option>
-            <option value="monthly">Last Month</option>
-            <option value="quarterly">Last Quarter</option>
-            <option value="yearly">Last Year</option>
+            <option value="weekly">LAST_WEEK</option>
+            <option value="monthly">LAST_MONTH</option>
+            <option value="quarterly">LAST_QUARTER</option>
+            <option value="yearly">LAST_YEAR</option>
           </select>
-          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            <Download className="w-4 h-4" />
-            <span>Export</span>
+          <button className="flex items-center gap-3 px-10 py-4 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] border-2 border-black shadow-[6px_6px_0_0_#0064ff] hover:shadow-none transition-all active:translate-x-1 active:translate-y-1">
+            <Download className="w-5 h-5" />
+            <span>EXPORT_DATA</span>
           </button>
         </div>
       </div>
@@ -123,28 +133,28 @@ export default function AnalyticsDashboard() {
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Total Employees"
+          title="TOTAL_EMPLOYEES"
           value={data.employees?.totalEmployees || 0}
           icon={Users}
           trend={5.2}
           color="blue"
         />
         <StatCard
-          title="Attendance Rate"
+          title="ATTENDANCE_RATE"
           value={`${data.attendance?.attendanceRate || 0}%`}
           icon={Calendar}
           trend={2.1}
           color="green"
         />
         <StatCard
-          title="Total Payroll"
+          title="TOTAL_PAYROLL"
           value={`$${(data.payroll?.totalNetSalary || 0).toLocaleString()}`}
           icon={DollarSign}
           trend={8.7}
           color="yellow"
         />
         <StatCard
-          title="Leave Requests"
+          title="LEAVE_REQUESTS"
           value={data.leave?.totalRequests || 0}
           icon={Award}
           trend={-3.2}
@@ -153,26 +163,34 @@ export default function AnalyticsDashboard() {
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Attendance Trends */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Attendance Trends</h3>
+        <div className="border-2 border-black bg-white shadow-[8px_8px_0_0_#000] p-8">
+          <h3 className="text-[10px] font-black text-gray-400 mb-6 uppercase tracking-[0.2em] font-mono italic">ATTENDANCE_TRENDS_ANALYSIS</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={attendanceData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
+              <CartesianGrid strokeDasharray="3 3" stroke="#000" />
+              <XAxis dataKey="date" tick={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 'bold' }} />
+              <YAxis tick={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 'bold' }} />
+              <Tooltip 
+                contentStyle={{ 
+                  border: '2px solid black', 
+                  fontFamily: 'monospace',
+                  fontSize: '10px',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase'
+                }} 
+              />
               <Legend />
-              <Line type="monotone" dataKey="present" stroke="#10B981" name="Present" />
-              <Line type="monotone" dataKey="absent" stroke="#EF4444" name="Absent" />
+              <Line type="monotone" dataKey="present" stroke="#10B981" strokeWidth={3} name="PRESENT" />
+              <Line type="monotone" dataKey="absent" stroke="#EF4444" strokeWidth={3} name="ABSENT" />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
         {/* Leave Distribution */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Leave Distribution</h3>
+        <div className="border-2 border-black bg-white shadow-[8px_8px_0_0_#000] p-8">
+          <h3 className="text-[10px] font-black text-gray-400 mb-6 uppercase tracking-[0.2em] font-mono italic">LEAVE_DISTRIBUTION_METRICS</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -189,43 +207,59 @@ export default function AnalyticsDashboard() {
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip 
+                contentStyle={{ 
+                  border: '2px solid black', 
+                  fontFamily: 'monospace',
+                  fontSize: '10px',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase'
+                }} 
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
 
         {/* Department Distribution */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Employees by Department</h3>
+        <div className="border-2 border-black bg-white shadow-[8px_8px_0_0_#000] p-8">
+          <h3 className="text-[10px] font-black text-gray-400 mb-6 uppercase tracking-[0.2em] font-mono italic">DEPARTMENT_DISTRIBUTION</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={departmentData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="employees" fill="#4F46E5" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#000" />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 'bold' }} />
+              <YAxis tick={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 'bold' }} />
+              <Tooltip 
+                contentStyle={{ 
+                  border: '2px solid black', 
+                  fontFamily: 'monospace',
+                  fontSize: '10px',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase'
+                }} 
+              />
+              <Bar dataKey="employees" fill="#4F46E5" stroke="#000" strokeWidth={2} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         {/* Performance Overview */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Overview</h3>
-          {data.performance?.averageRatings ? (
-            <div className="space-y-4">
+        <div className="border-2 border-black bg-white shadow-[8px_8px_0_0_#000] p-8">
+          <h3 className="text-[10px] font-black text-gray-400 mb-6 uppercase tracking-[0.2em] font-mono italic">PERFORMANCE_OVERVIEW</h3>
+          {data.performance?.averageRatings && Object.keys(data.performance.averageRatings).length > 0 ? (
+            <div className="space-y-6">
               {Object.entries(data.performance.averageRatings).map(([key, value]) => (
                 <div key={key} className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700 capitalize">
-                    {key.replace(/([A-Z])/g, ' $1').trim()} Rating
+                  <span className="text-[10px] font-black text-black uppercase tracking-widest font-mono">
+                    {key.replace(/([A-Z])/g, ' $1').trim()}_RATING
                   </span>
-                  <div className="flex items-center space-x-2">
-                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1 bg-gray-200 border-2 border-black h-4">
                       <div
-                        className="bg-blue-600 h-2 rounded-full"
+                        className="bg-blue-600 h-2 mt-0.5"
                         style={{ width: `${(value / 5) * 100}%` }}
                       ></div>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-[10px] font-black text-black font-mono uppercase">
                       {value?.toFixed(1) || '0.0'}
                     </span>
                   </div>
@@ -233,33 +267,36 @@ export default function AnalyticsDashboard() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-8">No performance data available</p>
+            <div className="text-center py-8">
+              <p className="text-gray-500 font-mono font-black uppercase tracking-widest mb-4">NO_PERFORMANCE_REVIEWS_FOUND</p>
+              <p className="text-[8px] font-mono text-gray-400 uppercase tracking-widest">PERFORMANCE_DATA_WILL_APPEAR_ONCE_REVIEWS_ARE_SUBMITTED</p>
+            </div>
           )}
         </div>
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+      <div className="border-2 border-black bg-white shadow-[8px_8px_0_0_#000]">
+        <div className="p-6 border-b-2 border-black">
+          <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] font-mono italic">RECENT_ACTIVITY_LOG</h3>
         </div>
         <div className="p-6">
-          <div className="space-y-4">
+          <div className="space-y-6">
             {data.employees?.recentEmployees?.slice(0, 5).map((employee) => (
-              <div key={employee.id} className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Users className="w-4 h-4 text-blue-600" />
+              <div key={employee.id} className="flex items-center justify-between border-b border-black pb-4 last:border-0 last:pb-0">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 border-2 border-black bg-blue-500 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{employee.name}</p>
-                    <p className="text-xs text-gray-500">
-                      {employee.jobDetails?.jobPosition} • Joined {new Date(employee.createdAt).toLocaleDateString()}
+                    <p className="text-[10px] font-black text-black uppercase tracking-widest">{employee.name}</p>
+                    <p className="text-[8px] font-mono text-gray-500 uppercase tracking-widest mt-1">
+                      {employee.jobDetails?.jobPosition} • JOINED {new Date(employee.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
-                <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                  New
+                <span className="px-3 py-1 text-[8px] font-black uppercase tracking-widest border-2 border-black bg-green-500 text-white">
+                  NEW
                 </span>
               </div>
             ))}
