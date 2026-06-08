@@ -1,12 +1,12 @@
-'use client';
-
-import { SessionProvider } from 'next-auth/react';
+import { Providers } from '@/components/providers/session-provider';
 import './globals.css';
 
 export default function RootLayout({ children }) {
     return (
         <html lang="en">
             <head>
+                <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+                <link rel="manifest" href="/manifest.json" />
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
                 <link
@@ -14,8 +14,8 @@ export default function RootLayout({ children }) {
                     rel="stylesheet"
                 />
             </head>
-            <body className="font-sans antialiased">
-                <SessionProvider>{children}</SessionProvider>
+            <body className="font-sans antialiased" suppressHydrationWarning>
+                <Providers>{children}</Providers>
             </body>
         </html>
     );
