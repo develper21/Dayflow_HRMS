@@ -92,16 +92,15 @@ export default function TrainingManagement() {
 
   const getStatusColor = (status) => {
     const colors = {
-      'PLANNED': 'bg-blue-100 text-blue-800',
-      'ONGOING': 'bg-yellow-100 text-yellow-800',
-      'COMPLETED': 'bg-green-100 text-green-800',
-      'CANCELLED': 'bg-red-100 text-red-800',
-      'ENROLLED': 'bg-blue-100 text-blue-800',
-      'IN_PROGRESS': 'bg-yellow-100 text-yellow-800',
-      'COMPLETED': 'bg-green-100 text-green-800',
-      'DROPPED': 'bg-red-100 text-red-800'
+      'PLANNED': 'bg-blue-500 text-white border-2 border-black',
+      'ONGOING': 'bg-yellow-400 text-black border-2 border-black',
+      'COMPLETED': 'bg-green-500 text-white border-2 border-black',
+      'CANCELLED': 'bg-red-500 text-white border-2 border-black',
+      'ENROLLED': 'bg-blue-500 text-white border-2 border-black',
+      'IN_PROGRESS': 'bg-yellow-400 text-black border-2 border-black',
+      'DROPPED': 'bg-red-500 text-white border-2 border-black'
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return colors[status] || 'bg-gray-200 text-black border-2 border-black';
   };
 
   const getCategoryIcon = (category) => {
@@ -126,49 +125,49 @@ export default function TrainingManagement() {
   });
 
   const TrainingCard = ({ training, isEnrollment = false }) => (
-    <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+    <div className="border-2 border-black bg-white shadow-[4px_4px_0_0_#000] p-6 hover:shadow-[6px_6px_0_0_#000] transition-shadow">
       <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 border-2 border-black bg-blue-500 flex items-center justify-center">
             {getCategoryIcon(training.category)}
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">{training.title}</h3>
-            <p className="text-sm text-gray-500">{training.category}</p>
+            <h3 className="text-[10px] font-black text-black uppercase tracking-widest">{training.title}</h3>
+            <p className="text-[8px] font-mono text-gray-500 uppercase tracking-widest">{training.category}</p>
           </div>
         </div>
-        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(training.status)}`}>
+        <span className={`px-3 py-1 text-[8px] font-black uppercase tracking-widest ${getStatusColor(training.status)}`}>
           {training.status}
         </span>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {training.description && (
-          <p className="text-sm text-gray-600 line-clamp-2">{training.description}</p>
+          <p className="text-[10px] text-black font-mono uppercase tracking-wider line-clamp-2">{training.description}</p>
         )}
 
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-2 gap-4 text-[10px]">
           {training.duration && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-700">{training.duration} hours</span>
+              <span className="text-black font-mono uppercase">{training.duration} HOURS</span>
             </div>
           )}
           {training.cost && (
-            <div className="flex items-center space-x-2">
-              <span className="text-gray-700">${training.cost}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-black font-mono uppercase">${training.cost}</span>
             </div>
           )}
           {training.instructor && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-700">{training.instructor}</span>
+              <span className="text-black font-mono uppercase">{training.instructor}</span>
             </div>
           )}
           {training.startDate && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-700">
+              <span className="text-black font-mono uppercase">
                 {new Date(training.startDate).toLocaleDateString()}
               </span>
             </div>
@@ -177,13 +176,13 @@ export default function TrainingManagement() {
 
         {isEnrollment && training.progress !== undefined && (
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-medium text-gray-700">Progress</span>
-              <span className="text-sm text-gray-500">{training.progress}%</span>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono">PROGRESS</span>
+              <span className="text-[10px] font-black text-black font-mono uppercase">{training.progress}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 border-2 border-black h-4">
               <div
-                className="bg-blue-600 h-2 rounded-full"
+                className="bg-blue-600 h-2 mt-0.5"
                 style={{ width: `${training.progress}%` }}
               ></div>
             </div>
@@ -191,25 +190,25 @@ export default function TrainingManagement() {
         )}
 
         {!isEnrollment && training.enrollments && (
-          <div className="flex items-center justify-between text-sm text-gray-600">
-            <span>{training.enrollments.length} enrolled</span>
-            <span>{training.enrollments.filter(e => e.status === 'COMPLETED').length} completed</span>
+          <div className="flex items-center justify-between text-[10px] text-black font-mono uppercase">
+            <span>{training.enrollments.length} ENROLLED</span>
+            <span>{training.enrollments.filter(e => e.status === 'COMPLETED').length} COMPLETED</span>
           </div>
         )}
       </div>
 
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-        <span className="text-xs text-gray-500">
-          Created: {new Date(training.createdAt).toLocaleDateString()}
+      <div className="flex items-center justify-between mt-6 pt-4 border-t-2 border-black">
+        <span className="text-[8px] font-mono text-gray-500 uppercase tracking-widest">
+          CREATED: {new Date(training.createdAt).toLocaleDateString()}
         </span>
-        <div className="flex items-center space-x-2">
-          <button className="text-blue-600 hover:text-blue-800">
+        <div className="flex items-center gap-2">
+          <button className="p-2 border-2 border-black bg-white hover:bg-black hover:text-white transition-all">
             <Eye className="w-4 h-4" />
           </button>
           {!isEnrollment && training.status === 'PLANNED' && (
             <button
               onClick={() => enrollInTraining(training.id)}
-              className="text-green-600 hover:text-green-800"
+              className="p-2 border-2 border-black bg-green-500 text-white hover:bg-green-600 transition-all"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -217,7 +216,7 @@ export default function TrainingManagement() {
           {isEnrollment && training.status === 'ENROLLED' && (
             <button
               onClick={() => updateProgress(training.id, Math.min(100, training.progress + 10), 'IN_PROGRESS')}
-              className="text-yellow-600 hover:text-yellow-800"
+              className="p-2 border-2 border-black bg-yellow-400 text-black hover:bg-yellow-500 transition-all"
             >
               <PlayCircle className="w-4 h-4" />
             </button>
@@ -250,132 +249,133 @@ export default function TrainingManagement() {
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex items-center justify-center min-h-screen px-4">
-          <div className="fixed inset-0 bg-black opacity-25" onClick={onClose}></div>
-          
-          <div className="relative bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Create New Training</h3>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px]" onClick={onClose}></div>
+
+          <div className="relative bg-white border-[3px] border-black shadow-[16px_16px_0_0_#000] w-full max-w-md p-10">
+            <h3 className="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-[0.3em] font-mono italic">TRAINING_CREATION_PROTOCOL</h3>
+            <h2 className="text-2xl font-black text-black uppercase tracking-tight italic mb-8">Create New Training</h2>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Training Title
+                <label className="block text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2">
+                  TRAINING_TITLE
                 </label>
                 <input
                   type="text"
                   required
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-3 border-2 border-black text-[10px] font-black uppercase tracking-widest bg-white outline-none font-mono placeholder:text-gray-300"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
+                <label className="block text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2">
+                  DESCRIPTION
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-3 border-2 border-black text-[10px] font-mono uppercase tracking-wider bg-white outline-none placeholder:text-gray-300"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Category
+                  <label className="block text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2">
+                    CATEGORY
                   </label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border-2 border-black text-[10px] font-black uppercase tracking-widest bg-white outline-none font-mono"
                   >
-                    <option value="TECHNICAL">Technical</option>
-                    <option value="SOFT_SKILLS">Soft Skills</option>
-                    <option value="COMPLIANCE">Compliance</option>
-                    <option value="SAFETY">Safety</option>
+                    <option value="TECHNICAL">TECHNICAL</option>
+                    <option value="SOFT_SKILLS">SOFT_SKILLS</option>
+                    <option value="COMPLIANCE">COMPLIANCE</option>
+                    <option value="SAFETY">SAFETY</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Duration (hours)
+                  <label className="block text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2">
+                    DURATION (HOURS)
                   </label>
                   <input
                     type="number"
                     value={formData.duration}
                     onChange={(e) => setFormData(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border-2 border-black text-[10px] font-black uppercase tracking-widest bg-white outline-none font-mono"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Cost ($)
+                  <label className="block text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2">
+                    COST ($)
                   </label>
                   <input
                     type="number"
                     value={formData.cost}
                     onChange={(e) => setFormData(prev => ({ ...prev, cost: parseFloat(e.target.value) }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border-2 border-black text-[10px] font-black uppercase tracking-widest bg-white outline-none font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Instructor
+                  <label className="block text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2">
+                    INSTRUCTOR
                   </label>
                   <input
                     type="text"
                     value={formData.instructor}
                     onChange={(e) => setFormData(prev => ({ ...prev, instructor: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border-2 border-black text-[10px] font-black uppercase tracking-widest bg-white outline-none font-mono"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Start Date
+                  <label className="block text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2">
+                    START_DATE
                   </label>
                   <input
                     type="date"
                     value={formData.startDate}
                     onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border-2 border-black text-[10px] font-black uppercase tracking-widest bg-white outline-none font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    End Date
+                  <label className="block text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono mb-2">
+                    END_DATE
                   </label>
                   <input
                     type="date"
                     value={formData.endDate}
                     onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border-2 border-black text-[10px] font-black uppercase tracking-widest bg-white outline-none font-mono"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-3 pt-4">
+              <div className="flex justify-end gap-6 pt-6">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-black border-2 border-black bg-white hover:bg-gray-100 transition-all"
                 >
-                  Cancel
+                  CANCEL
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-6 py-3 bg-black text-white text-[10px] font-black uppercase tracking-widest border-2 border-black shadow-[4px_4px_0_0_#000] hover:shadow-none transition-all active:translate-x-1 active:translate-y-1"
                 >
-                  Create Training
+                  CREATE_TRAINING
                 </button>
               </div>
             </form>
@@ -386,89 +386,89 @@ export default function TrainingManagement() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Training Management</h1>
-          <p className="text-gray-600 mt-1">Manage employee training programs and enrollments</p>
+          <h2 className="text-[10px] font-black text-gray-400 mb-2 uppercase tracking-[0.3em] font-mono italic">TRAINING_MANAGEMENT_MODULE</h2>
+          <h1 className="text-4xl font-black text-black uppercase tracking-tight italic underline underline-offset-8 decoration-4 decoration-blue-500">Training Dashboard</h1>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="flex items-center gap-3 px-10 py-4 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] border-2 border-black shadow-[6px_6px_0_0_#0064ff] hover:shadow-none transition-all active:translate-x-1 active:translate-y-1"
         >
-          <Plus className="w-4 h-4" />
-          <span>New Training</span>
+          <Plus className="w-5 h-5" />
+          <span>CREATE_NEW_TRAINING</span>
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="border-b border-gray-200">
-          <nav className="flex -mb-px">
+      <div className="border-2 border-black bg-white shadow-[4px_4px_0_0_#000]">
+        <div className="border-b-2 border-black">
+          <nav className="flex">
             <button
               onClick={() => setActiveTab('trainings')}
-              className={`py-2 px-4 border-b-2 font-medium text-sm ${
+              className={`px-8 py-4 text-[10px] font-black uppercase tracking-widest border-b-4 ${
                 activeTab === 'trainings'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-black bg-black text-white'
+                  : 'border-transparent text-black hover:bg-gray-100'
               }`}
             >
-              Training Programs
+              TRAINING_PROGRAMS
             </button>
             <button
               onClick={() => setActiveTab('enrollments')}
-              className={`py-2 px-4 border-b-2 font-medium text-sm ${
+              className={`px-8 py-4 text-[10px] font-black uppercase tracking-widest border-b-4 ${
                 activeTab === 'enrollments'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-black bg-black text-white'
+                  : 'border-transparent text-black hover:bg-gray-100'
               }`}
             >
-              My Enrollments
+              MY_ENROLLMENTS
             </button>
           </nav>
         </div>
 
         {/* Filters */}
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-6 border-b-2 border-black">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Search trainings..."
+                  placeholder="SEARCH_TRAININGS..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-black text-[10px] font-black uppercase tracking-widest bg-white outline-none font-mono placeholder:text-gray-300"
                 />
               </div>
             </div>
-            
+
             {activeTab === 'trainings' && (
               <>
                 <select
                   value={filterCategory}
                   onChange={(e) => setFilterCategory(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="px-6 py-3 border-2 border-black text-[10px] font-black uppercase tracking-widest bg-white outline-none cursor-pointer font-mono"
                 >
-                  <option value="all">All Categories</option>
-                  <option value="TECHNICAL">Technical</option>
-                  <option value="SOFT_SKILLS">Soft Skills</option>
-                  <option value="COMPLIANCE">Compliance</option>
-                  <option value="SAFETY">Safety</option>
+                  <option value="all">ALL_CATEGORIES</option>
+                  <option value="TECHNICAL">TECHNICAL</option>
+                  <option value="SOFT_SKILLS">SOFT_SKILLS</option>
+                  <option value="COMPLIANCE">COMPLIANCE</option>
+                  <option value="SAFETY">SAFETY</option>
                 </select>
 
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="px-6 py-3 border-2 border-black text-[10px] font-black uppercase tracking-widest bg-white outline-none cursor-pointer font-mono"
                 >
-                  <option value="all">All Status</option>
-                  <option value="PLANNED">Planned</option>
-                  <option value="ONGOING">Ongoing</option>
-                  <option value="COMPLETED">Completed</option>
-                  <option value="CANCELLED">Cancelled</option>
+                  <option value="all">ALL_STATUS</option>
+                  <option value="PLANNED">PLANNED</option>
+                  <option value="ONGOING">ONGOING</option>
+                  <option value="COMPLETED">COMPLETED</option>
+                  <option value="CANCELLED">CANCELLED</option>
                 </select>
               </>
             )}
@@ -476,31 +476,31 @@ export default function TrainingManagement() {
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-8">
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="bg-white rounded-lg shadow p-6">
+                <div key={i} className="border-2 border-black bg-white shadow-[4px_4px_0_0_#000] p-6">
                   <div className="animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                    <div className="h-4 bg-gray-200 border-2 border-black w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-200 border-2 border-black w-1/2 mb-4"></div>
                     <div className="space-y-2">
-                      <div className="h-3 bg-gray-200 rounded"></div>
-                      <div className="h-3 bg-gray-200 rounded w-5/6"></div>
-                      <div className="h-3 bg-gray-200 rounded w-4/6"></div>
+                      <div className="h-3 bg-gray-200 border-2 border-black"></div>
+                      <div className="h-3 bg-gray-200 border-2 border-black w-5/6"></div>
+                      <div className="h-3 bg-gray-200 border-2 border-black w-4/6"></div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : activeTab === 'trainings' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredTrainings.map(training => (
                 <TrainingCard key={training.id} training={training} />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredEnrollments.map(enrollment => (
                 <TrainingCard key={enrollment.id} training={enrollment} isEnrollment={true} />
               ))}
