@@ -1,9 +1,8 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { EmployeeSidebar } from '@/components/employee/employee-sidebar';
 import Link from 'next/link';
 
 export default function ProfilePage() {
@@ -14,6 +13,8 @@ export default function ProfilePage() {
     useEffect(() => {
         if (session?.user?.id) {
             fetchProfile();
+        } else {
+            setLoading(false);
         }
     }, [session]);
 
@@ -33,14 +34,15 @@ export default function ProfilePage() {
 
     if (loading) {
         return (
-            <DashboardLayout
-                companyName={session?.user?.companyName}
-                companyLogo={session?.user?.companyLogo}
-            >
-                <div className="flex items-center justify-center h-64">
-                    <p className="text-gray-500">Loading profile...</p>
-                </div>
-            </DashboardLayout>
+            <div className="min-h-screen flex">
+                <EmployeeSidebar />
+                <main className="flex-1 ml-64 p-8 flex items-center justify-center">
+                    <div className="text-center">
+                        <div className="inline-block w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+                        <p className="mt-4 text-gray-600 font-mono text-xs uppercase tracking-widest">Loading profile...</p>
+                    </div>
+                </main>
+            </div>
         );
     }
 
@@ -50,108 +52,97 @@ export default function ProfilePage() {
     const salaryStructure = profile?.salaryStructure || {};
 
     return (
-        <DashboardLayout
-            companyName={session?.user?.companyName}
-            companyLogo={session?.user?.companyLogo}
-        >
-            <div className="max-w-6xl mx-auto space-y-6">
-                <div className="flex justify-between items-center">
+        <div className="min-h-screen flex">
+            <EmployeeSidebar />
+            
+            <main className="flex-1 ml-64 p-8" style={{
+                backgroundImage: `
+                    linear-gradient(to right, #e5e5e5 1px, transparent 1px),
+                    linear-gradient(to bottom, #e5e5e5 1px, transparent 1px)
+                `,
+                backgroundSize: '40px 40px'
+            }}>
+                <h2 className="text-[10px] font-black text-gray-400 mb-6 uppercase tracking-[0.3em] font-mono italic">STAFF_PORTAL / PROFILE_MANAGEMENT</h2>
+                <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
-                        <p className="text-gray-600 mt-2">View and manage your profile information</p>
+                        <h1 className="text-4xl font-black text-black uppercase tracking-tight mb-2 italic underline underline-offset-8 decoration-4 decoration-blue-500">My Profile</h1>
+                        <p className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest">View and manage your profile information</p>
                     </div>
-                    <Link href="/profile/edit">
-                        <button className="px-6 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors">
-                            Edit Profile
+                    <div className="flex gap-4">
+                        <Link href="/profile/edit">
+                            <button className="bg-black text-white text-[10px] font-black uppercase tracking-widest px-6 py-3 border border-black shadow-[4px_4px_0_0_#000] hover:bg-gray-900 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all">
+                                EDIT PROFILE
+                            </button>
+                        </Link>
+                        <button
+                            onClick={() => signOut({ callbackUrl: '/' })}
+                            className="bg-red-600 text-white text-[10px] font-black uppercase tracking-widest px-6 py-3 border border-black shadow-[4px_4px_0_0_#000] hover:bg-red-700 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
+                        >
+                            TERMINATE SESSION
                         </button>
-                    </Link>
+                    </div>
                 </div>
 
                 {/* Profile Header */}
-                <Card>
-                    <CardContent className="pt-6">
-                        <div className="flex items-start gap-6">
+                <h2 className="text-[10px] font-black text-gray-400 mb-6 uppercase tracking-[0.3em] font-mono italic">BASIC_INFORMATION</h2>
+                <div className="border border-black bg-white shadow-[8px_8px_0_0_#000] mb-8">
+                    <div className="p-8">
+                        <div className="flex items-start gap-8">
                             <div className="relative">
-                                <div className="w-24 h-24 rounded-full bg-primary-600 flex items-center justify-center text-white text-3xl font-bold">
+                                <div className="w-32 h-32 border-4 border-black flex items-center justify-center overflow-hidden bg-white">
                                     {profileData.profilePicture ? (
                                         <img
                                             src={profileData.profilePicture}
                                             alt={user.name}
-                                            className="w-24 h-24 rounded-full object-cover"
+                                            className="w-full h-full object-cover"
                                         />
                                     ) : (
-                                        user.name?.charAt(0)?.toUpperCase() || 'U'
+                                        <div className="text-4xl font-black text-gray-400">
+                                            {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                                        </div>
                                     )}
                                 </div>
                             </div>
-                            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="text-sm font-medium text-gray-500">Name</label>
-                                    <p className="text-lg font-semibold text-gray-900 mt-1">
-                                        {user.name || '-'}
-                                    </p>
+                            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="border-l-4 border-black pl-4">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Name</label>
+                                    <p className="text-lg font-bold text-black uppercase mt-1">{user.name || '-'}</p>
                                 </div>
-                                <div>
-                                    <label className="text-sm font-medium text-gray-500">
-                                        Login ID
-                                    </label>
-                                    <p className="text-lg font-semibold text-gray-900 mt-1">
-                                        {user.employeeId || '-'}
-                                    </p>
+                                <div className="border-l-4 border-black pl-4">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Login ID</label>
+                                    <p className="text-lg font-mono font-bold text-blue-600 mt-1">{user.employeeId || '-'}</p>
                                 </div>
-                                <div>
-                                    <label className="text-sm font-medium text-gray-500">Email</label>
-                                    <p className="text-lg font-semibold text-gray-900 mt-1">
-                                        {user.email || '-'}
-                                    </p>
+                                <div className="border-l-4 border-black pl-4">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Email</label>
+                                    <p className="text-lg font-bold text-gray-800 mt-1">{user.email || '-'}</p>
                                 </div>
-                                <div>
-                                    <label className="text-sm font-medium text-gray-500">Phone</label>
-                                    <p className="text-lg font-semibold text-gray-900 mt-1">
-                                        {user.phone || '-'}
-                                    </p>
+                                <div className="border-l-4 border-black pl-4">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Phone</label>
+                                    <p className="text-lg font-bold text-gray-800 mt-1">{user.phone || '-'}</p>
                                 </div>
-                                <div>
-                                    <label className="text-sm font-medium text-gray-500">Company</label>
-                                    <p className="text-lg font-semibold text-gray-900 mt-1">
-                                        {session?.user?.companyName || '-'}
-                                    </p>
+                                <div className="border-l-4 border-black pl-4">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Company</label>
+                                    <p className="text-lg font-bold text-black uppercase mt-1">{session?.user?.companyName || '-'}</p>
                                 </div>
-                                <div>
-                                    <label className="text-sm font-medium text-gray-500">
-                                        Department
-                                    </label>
-                                    <p className="text-lg font-semibold text-gray-900 mt-1">
-                                        {jobDetails.department || '-'}
-                                    </p>
+                                <div className="border-l-4 border-black pl-4">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Department</label>
+                                    <p className="text-lg font-bold text-black uppercase mt-1">{jobDetails.department || '-'}</p>
                                 </div>
-                                <div>
-                                    <label className="text-sm font-medium text-gray-500">
-                                        Job Position
-                                    </label>
-                                    <p className="text-lg font-semibold text-gray-900 mt-1">
-                                        {jobDetails.jobPosition || '-'}
-                                    </p>
+                                <div className="border-l-4 border-black pl-4">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Job Position</label>
+                                    <p className="text-lg font-bold text-black uppercase mt-1">{jobDetails.jobPosition || '-'}</p>
                                 </div>
-                                <div>
-                                    <label className="text-sm font-medium text-gray-500">Manager</label>
-                                    <p className="text-lg font-semibold text-gray-900 mt-1">
-                                        {jobDetails.manager || '-'}
-                                    </p>
+                                <div className="border-l-4 border-black pl-4">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Manager</label>
+                                    <p className="text-lg font-bold text-gray-800 mt-1">{jobDetails.manager || '-'}</p>
                                 </div>
-                                <div>
-                                    <label className="text-sm font-medium text-gray-500">
-                                        Work Location
-                                    </label>
-                                    <p className="text-lg font-semibold text-gray-900 mt-1">
-                                        {jobDetails.workLocation || '-'}
-                                    </p>
+                                <div className="border-l-4 border-black pl-4">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Work Location</label>
+                                    <p className="text-lg font-bold text-gray-800 uppercase italic mt-1">{jobDetails.workLocation || '-'}</p>
                                 </div>
-                                <div>
-                                    <label className="text-sm font-medium text-gray-500">
-                                        Date of Joining
-                                    </label>
-                                    <p className="text-lg font-semibold text-gray-900 mt-1">
+                                <div className="border-l-4 border-black pl-4">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Date of Joining</label>
+                                    <p className="text-lg font-bold text-gray-800 mt-1">
                                         {jobDetails.dateOfJoining
                                             ? new Date(jobDetails.dateOfJoining).toLocaleDateString()
                                             : '-'}
@@ -159,123 +150,164 @@ export default function ProfilePage() {
                                 </div>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
 
                 {/* Personal Information */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Personal Information</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <h2 className="text-[10px] font-black text-gray-400 mb-6 uppercase tracking-[0.3em] font-mono italic">PERSONAL_DETAILS</h2>
+                <div className="border border-black bg-white shadow-[8px_8px_0_0_#000] mb-8">
+                    <div className="px-8 py-4 border-b border-black bg-gray-50">
+                        <h2 className="text-sm font-black uppercase tracking-widest italic">PERSONAL_INFORMATION</h2>
+                    </div>
+                    <div className="p-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
-                                <label className="text-sm font-medium text-gray-500">
-                                    Date of Birth
-                                </label>
-                                <p className="text-gray-900 mt-1">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Date of Birth</label>
+                                <p className="text-gray-900 font-bold mt-1">
                                     {profileData.dateOfBirth
                                         ? new Date(profileData.dateOfBirth).toLocaleDateString()
                                         : '-'}
                                 </p>
                             </div>
                             <div>
-                                <label className="text-sm font-medium text-gray-500">Gender</label>
-                                <p className="text-gray-900 mt-1">{profileData.gender || '-'}</p>
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Gender</label>
+                                <p className="text-gray-900 font-bold mt-1">{profileData.gender || '-'}</p>
                             </div>
                             <div>
-                                <label className="text-sm font-medium text-gray-500">
-                                    Marital Status
-                                </label>
-                                <p className="text-gray-900 mt-1">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Marital Status</label>
+                                <p className="text-gray-900 font-bold mt-1">
                                     {profileData.maritalStatus || '-'}
                                 </p>
                             </div>
                             <div>
-                                <label className="text-sm font-medium text-gray-500">Nationality</label>
-                                <p className="text-gray-900 mt-1">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Nationality</label>
+                                <p className="text-gray-900 font-bold mt-1">
                                     {profileData.nationality || '-'}
                                 </p>
                             </div>
                             <div className="md:col-span-2">
-                                <label className="text-sm font-medium text-gray-500">
-                                    Residing Address
-                                </label>
-                                <p className="text-gray-900 mt-1">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Residing Address</label>
+                                <p className="text-gray-900 font-bold mt-1">
                                     {profileData.residingAddress || '-'}
                                 </p>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
 
                 {/* About Section */}
                 {(profileData.about ||
                     profileData.jobLoves ||
                     profileData.interestsHobbies) && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>About</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {profileData.about && (
-                                <div>
-                                    <label className="text-sm font-medium text-gray-500">About</label>
-                                    <p className="text-gray-900 mt-1">{profileData.about}</p>
-                                </div>
-                            )}
-                            {profileData.jobLoves && (
-                                <div>
-                                    <label className="text-sm font-medium text-gray-500">
-                                        What I love about my job
-                                    </label>
-                                    <p className="text-gray-900 mt-1">{profileData.jobLoves}</p>
-                                </div>
-                            )}
-                            {profileData.interestsHobbies && (
-                                <div>
-                                    <label className="text-sm font-medium text-gray-500">
-                                        My interests and hobbies
-                                    </label>
-                                    <p className="text-gray-900 mt-1">
-                                        {profileData.interestsHobbies}
-                                    </p>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
+                    <>
+                        <h2 className="text-[10px] font-black text-gray-400 mb-6 uppercase tracking-[0.3em] font-mono italic">ABOUT_SECTION</h2>
+                        <div className="border border-black bg-white shadow-[8px_8px_0_0_#000] mb-8">
+                            <div className="px-8 py-4 border-b border-black bg-gray-50">
+                                <h2 className="text-sm font-black uppercase tracking-widest italic">ABOUT</h2>
+                            </div>
+                            <div className="p-8 space-y-6">
+                                {profileData.about && (
+                                    <div>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">About</label>
+                                        <p className="text-gray-900 font-bold mt-1">{profileData.about}</p>
+                                    </div>
+                                )}
+                                {profileData.jobLoves && (
+                                    <div>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">What I love about my job</label>
+                                        <p className="text-gray-900 font-bold mt-1">{profileData.jobLoves}</p>
+                                    </div>
+                                )}
+                                {profileData.interestsHobbies && (
+                                    <div>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">My interests and hobbies</label>
+                                        <p className="text-gray-900 font-bold mt-1">
+                                            {profileData.interestsHobbies}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </>
                 )}
 
                 {/* Salary Structure (Read-only for employees) */}
                 {salaryStructure.monthlyWage && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Salary Information</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="text-sm font-medium text-gray-500">
-                                        Monthly Wage
-                                    </label>
-                                    <p className="text-2xl font-bold text-primary-600 mt-1">
-                                        ₹{salaryStructure.monthlyWage?.toLocaleString() || '0'}
-                                    </p>
-                                </div>
-                                <div>
-                                    <label className="text-sm font-medium text-gray-500">
-                                        Yearly Wage
-                                    </label>
-                                    <p className="text-2xl font-bold text-primary-600 mt-1">
-                                        ₹{salaryStructure.yearlyWage?.toLocaleString() || '0'}
-                                    </p>
+                    <>
+                        <h2 className="text-[10px] font-black text-gray-400 mb-6 uppercase tracking-[0.3em] font-mono italic">SALARY_INFORMATION</h2>
+                        <div className="border border-black bg-white shadow-[8px_8px_0_0_#000] mb-8">
+                            <div className="px-8 py-4 border-b border-black bg-gray-50">
+                                <h2 className="text-sm font-black uppercase tracking-widest italic">SALARY_DETAILS</h2>
+                            </div>
+                            <div className="p-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Monthly Wage</label>
+                                        <p className="text-3xl font-black text-blue-600 mt-1 font-mono">
+                                            ₹{salaryStructure.monthlyWage?.toLocaleString() || '0'}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Yearly Wage</label>
+                                        <p className="text-3xl font-black text-blue-600 mt-1 font-mono">
+                                            ₹{salaryStructure.yearlyWage?.toLocaleString() || '0'}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </>
                 )}
-            </div>
-        </DashboardLayout>
+
+                {/* Bank & KYC Details */}
+                <h2 className="text-[10px] font-black text-gray-400 mb-6 uppercase tracking-[0.3em] font-mono italic">BANK_KYC_INFORMATION</h2>
+                <div className="border border-black bg-white shadow-[8px_8px_0_0_#000]">
+                    <div className="px-8 py-4 border-b border-black bg-gray-50">
+                        <h2 className="text-sm font-black uppercase tracking-widest italic">BANK_KYC_DETAILS</h2>
+                    </div>
+                    <div className="p-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="space-y-6">
+                                <h3 className="text-sm font-black uppercase tracking-widest border-b border-black pb-2 italic">Identity Verification</h3>
+                                <div>
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Nationality</label>
+                                    <p className="font-bold text-black mt-1 uppercase">{profileData.nationality || 'NOT SPECIFIED'}</p>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Gender</label>
+                                    <p className="font-bold text-black mt-1 font-mono italic">{profileData.gender || 'NOT SPECIFIED'}</p>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Physical Address</label>
+                                    <p className="font-bold text-blue-600 mt-1 italic">{profileData.residingAddress || 'ADDRESS VERIFICATION PENDING'}</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6 bg-gray-50/50 p-6 border border-black">
+                                <h3 className="text-sm font-black uppercase tracking-widest border-b border-black pb-2 italic">Financial & Bank Records</h3>
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="text-[10px] font-black text-red-400 uppercase tracking-widest">Permanent Account (PAN)</label>
+                                        <p className="font-mono font-bold text-black mt-1">{profileData.panNumber || 'REQUIRED'}</p>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-green-400 uppercase tracking-widest">UAN Number</label>
+                                        <p className="font-mono font-bold text-black mt-1">{profileData.uanNumber || 'REQUIRED'}</p>
+                                    </div>
+                                </div>
+                                <div className="bg-white border border-black p-4 mt-4">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <p className="text-[10px] font-black uppercase">Bank Account</p>
+                                        <p className="text-[8px] font-mono text-gray-400">ENCRYPTED</p>
+                                    </div>
+                                    <p className="text-lg font-black tracking-widest font-mono italic">{profileData.accountNumber || 'XXXX XXXX XXXX'}</p>
+                                    <p className="text-xs font-bold text-gray-600 mt-2 uppercase">{profileData.bankName || 'AWAITING DETAILS'} - {profileData.ifscCode || 'IFSC'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
     );
 }
-
