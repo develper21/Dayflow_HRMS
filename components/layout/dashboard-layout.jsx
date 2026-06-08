@@ -62,6 +62,11 @@ const adminNavigationItems = [
     { name: 'Employees', href: '/admin/employees', icon: '👥', adminOnly: true },
     { name: 'Attendance', href: '/admin/attendance', icon: '⏰', adminOnly: true },
     { name: 'Time Off', href: '/admin/time-off', icon: '🛡️', adminOnly: true },
+    { name: 'Payroll', href: '/admin/payroll', icon: '💰', adminOnly: true },
+    { name: 'Reports', href: '/admin/reports', icon: '📈', adminOnly: true },
+    { name: 'Analytics', href: '/admin/analytics', icon: '📊', adminOnly: true },
+    { name: 'Performance', href: '/admin/performance', icon: '🎯', adminOnly: true },
+    { name: 'Training', href: '/admin/training', icon: '🎓', adminOnly: true },
     { name: 'Profile', href: '/admin/profile', icon: '👤', adminOnly: true },
 ];
 
