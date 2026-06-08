@@ -1,5 +1,4 @@
 import { SignupForm } from '@/components/auth/signup-form';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 export const metadata = {
     title: 'Register - Dayflow HR',
@@ -8,11 +7,14 @@ export const metadata = {
 
 export default function RegisterPage() {
     return (
-        <div className="min-h-screen bg-white relative overflow-hidden flex items-center justify-center p-4">
-            {/* Industrial Grid Background */}
-            <div className="absolute inset-0 z-0 opacity-[0.02]"
-                style={{ backgroundImage: 'linear-gradient(#000 1.5px, transparent 1.5px), linear-gradient(90deg, #000 1.5px, transparent 1.5px)', backgroundSize: '30px 30px' }}>
-            </div>
+        <div className="min-h-screen bg-white relative overflow-hidden flex items-center justify-center p-4" style={{
+            backgroundImage: `
+                linear-gradient(to right, #e5e5e5 1px, transparent 1px),
+                linear-gradient(to bottom, #e5e5e5 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px',
+            backgroundColor: '#fafafa'
+        }}>
 
             <div className="w-full max-w-2xl relative z-10">
                 {/* Logo and Branding */}
