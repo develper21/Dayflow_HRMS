@@ -495,6 +495,40 @@ async function main() {
     ]
   });
 
+  // Create documents
+  await prisma.document.createMany({
+    data: [
+      {
+        userId: employee1.id,
+        fileName: 'John_Doe_Resume.pdf',
+        fileType: 'application/pdf',
+        fileUrl: '/documents/john_doe_resume.pdf',
+        documentType: 'Resume'
+      },
+      {
+        userId: employee1.id,
+        fileName: 'John_Doe_Certificate.pdf',
+        fileType: 'application/pdf',
+        fileUrl: '/documents/john_doe_certificate.pdf',
+        documentType: 'Certificate'
+      },
+      {
+        userId: employee2.id,
+        fileName: 'Jane_Smith_Resume.pdf',
+        fileType: 'application/pdf',
+        fileUrl: '/documents/jane_smith_resume.pdf',
+        documentType: 'Resume'
+      },
+      {
+        userId: employee2.id,
+        fileName: 'Jane_Smith_ID_Proof.pdf',
+        fileType: 'application/pdf',
+        fileUrl: '/documents/jane_smith_id_proof.pdf',
+        documentType: 'ID Proof'
+      }
+    ]
+  });
+
   // Create company settings
   await prisma.companySettings.create({
     data: {
@@ -502,6 +536,32 @@ async function main() {
       year: currentYear,
       lastSerialNumber: 4
     }
+  });
+
+  // Create reports
+  await prisma.report.createMany({
+    data: [
+      {
+        name: 'Monthly Attendance Report - June 2024',
+        type: 'ATTENDANCE',
+        parameters: JSON.stringify({ month: 6, year: 2024 }),
+        format: 'PDF',
+        status: 'COMPLETED',
+        generatedBy: hr.id,
+        fileUrl: '/reports/attendance_june_2024.pdf',
+        fileSize: 1024000
+      },
+      {
+        name: 'Quarterly Payroll Report - Q2 2024',
+        type: 'PAYROLL',
+        parameters: JSON.stringify({ quarter: 2, year: 2024 }),
+        format: 'EXCEL',
+        status: 'COMPLETED',
+        generatedBy: hr.id,
+        fileUrl: '/reports/payroll_q2_2024.xlsx',
+        fileSize: 512000
+      }
+    ]
   });
 
   console.log('🎉 Database seeding completed successfully!');
