@@ -4,10 +4,7 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { EmployeeSidebar } from '@/components/employee/employee-sidebar';
 
 export default function EditProfilePage() {
     const { data: session } = useSession();
@@ -52,6 +49,11 @@ export default function EditProfilePage() {
                     setValue('about', data.profile.about || '');
                     setValue('jobLoves', data.profile.jobLoves || '');
                     setValue('interestsHobbies', data.profile.interestsHobbies || '');
+                    setValue('panNumber', data.profile.panNumber || '');
+                    setValue('uanNumber', data.profile.uanNumber || '');
+                    setValue('bankName', data.profile.bankName || '');
+                    setValue('accountNumber', data.profile.accountNumber || '');
+                    setValue('ifscCode', data.profile.ifscCode || '');
                 }
                 if (data.jobDetails) {
                     setValue('jobPosition', data.jobDetails.jobPosition || '');
@@ -98,82 +100,76 @@ export default function EditProfilePage() {
 
     if (loading) {
         return (
-            <DashboardLayout
-                companyName={session?.user?.companyName}
-                companyLogo={session?.user?.companyLogo}
-            >
-                <div className="flex items-center justify-center h-64">
-                    <p className="text-gray-500">Loading profile...</p>
-                </div>
-            </DashboardLayout>
+            <div className="min-h-screen flex">
+                <EmployeeSidebar />
+                <main className="flex-1 ml-64 p-8 flex items-center justify-center">
+                    <div className="text-center">
+                        <div className="inline-block w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+                        <p className="mt-4 text-gray-600 font-mono text-xs uppercase tracking-widest">Loading profile...</p>
+                    </div>
+                </main>
+            </div>
         );
     }
 
     return (
-        <DashboardLayout
-            companyName={session?.user?.companyName}
-            companyLogo={session?.user?.companyLogo}
-        >
-            <div className="max-w-4xl mx-auto space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Edit Profile</h1>
-                    <p className="text-gray-600 mt-2">Update your profile information</p>
+        <div className="min-h-screen flex">
+            <EmployeeSidebar />
+            <main className="flex-1 ml-64 p-8">
+                <h2 className="text-[10px] font-black text-gray-400 mb-6 uppercase tracking-[0.3em] font-mono italic">STAFF_PORTAL / EDIT_PROFILE</h2>
+                <div className="mb-8">
+                    <h1 className="text-4xl font-black text-black uppercase tracking-tight mb-2 italic underline underline-offset-8 decoration-4 decoration-blue-500">Edit Profile</h1>
+                    <p className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest">Update your profile information</p>
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                     {error && (
-                        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                            <p className="text-red-800 text-sm">{error}</p>
+                        <div className="border border-red-500 bg-red-50 p-4 shadow-[2px_2px_0_0_#000]">
+                            <p className="text-red-800 text-xs font-black uppercase tracking-widest">{error}</p>
                         </div>
                     )}
 
                     {/* Basic Information */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Basic Information</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="border border-black bg-white shadow-[8px_8px_0_0_#000]">
+                        <div className="px-8 py-4 border-b border-black bg-gray-50">
+                            <h2 className="text-sm font-black uppercase tracking-widest italic">BASIC_INFORMATION</h2>
+                        </div>
+                        <div className="p-8 space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {isAdmin && (
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Name <span className="text-red-500">*</span>
-                                        </label>
-                                        <Input
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Name <span className="text-red-500">*</span></label>
+                                        <input
                                             {...register('name', {
                                                 required: 'Name is required',
                                             })}
-                                            error={errors.name?.message}
+                                            className="w-full border border-black px-4 py-3 text-[10px] font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all"
                                         />
+                                        {errors.name && <p className="text-[8px] text-red-500 font-black uppercase mt-1">{errors.name.message}</p>}
                                     </div>
                                 )}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Phone
-                                    </label>
-                                    <Input
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Phone</label>
+                                    <input
                                         {...register('phone', {
                                             pattern: {
                                                 value: /^[0-9]{10}$/,
                                                 message: 'Phone must be 10 digits',
                                             },
                                         })}
-                                        error={errors.phone?.message}
+                                        className="w-full border border-black px-4 py-3 text-[10px] font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all"
                                     />
+                                    {errors.phone && <p className="text-[8px] text-red-500 font-black uppercase mt-1">{errors.phone.message}</p>}
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Date of Birth
-                                    </label>
-                                    <Input {...register('dateOfBirth')} type="date" />
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Date of Birth</label>
+                                    <input {...register('dateOfBirth')} type="date" className="w-full border border-black px-4 py-3 text-[10px] font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Gender
-                                    </label>
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Gender</label>
                                     <select
                                         {...register('gender')}
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none"
+                                        className="w-full border border-black px-4 py-3 text-[10px] font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all bg-white"
                                     >
                                         <option value="">Select Gender</option>
                                         <option value="Male">Male</option>
@@ -182,12 +178,10 @@ export default function EditProfilePage() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Marital Status
-                                    </label>
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Marital Status</label>
                                     <select
                                         {...register('maritalStatus')}
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none"
+                                        className="w-full border border-black px-4 py-3 text-[10px] font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all bg-white"
                                     >
                                         <option value="">Select Status</option>
                                         <option value="Single">Single</option>
@@ -197,119 +191,136 @@ export default function EditProfilePage() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Nationality
-                                    </label>
-                                    <Input {...register('nationality')} />
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nationality</label>
+                                    <input {...register('nationality')} className="w-full border border-black px-4 py-3 text-[10px] font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all" />
                                 </div>
                                 <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Residing Address
-                                    </label>
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Residing Address</label>
                                     <textarea
                                         {...register('residingAddress')}
                                         rows={3}
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none"
+                                        className="w-full border border-black px-4 py-3 text-[10px] font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all"
                                     />
                                 </div>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
+
+                    {/* Bank & KYC Information */}
+                    <div className="border border-black bg-white shadow-[8px_8px_0_0_#000]">
+                        <div className="px-8 py-4 border-b border-black bg-gray-50">
+                            <h2 className="text-sm font-black uppercase tracking-widest italic">BANK_KYC_INFORMATION</h2>
+                        </div>
+                        <div className="p-8 space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-2 block">PAN Number</label>
+                                    <input {...register('panNumber')} className="w-full border border-black px-4 py-3 text-[10px] font-mono font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all" />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black text-green-400 uppercase tracking-widest mb-2 block">UAN Number</label>
+                                    <input {...register('uanNumber')} className="w-full border border-black px-4 py-3 text-[10px] font-mono font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all" />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Bank Name</label>
+                                    <input {...register('bankName')} className="w-full border border-black px-4 py-3 text-[10px] font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all" />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Account Number</label>
+                                    <input {...register('accountNumber')} className="w-full border border-black px-4 py-3 text-[10px] font-mono font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all" />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">IFSC Code</label>
+                                    <input {...register('ifscCode')} className="w-full border border-black px-4 py-3 text-[10px] font-mono font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Job Details (Admin only) */}
                     {isAdmin && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Job Details</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="border border-black bg-white shadow-[8px_8px_0_0_#000]">
+                            <div className="px-8 py-4 border-b border-black bg-gray-50">
+                                <h2 className="text-sm font-black uppercase tracking-widest italic">JOB_DETAILS</h2>
+                            </div>
+                            <div className="p-8 space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Job Position
-                                        </label>
-                                        <Input {...register('jobPosition')} />
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Job Position</label>
+                                        <input {...register('jobPosition')} className="w-full border border-black px-4 py-3 text-[10px] font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all" />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Department
-                                        </label>
-                                        <Input {...register('department')} />
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Department</label>
+                                        <input {...register('department')} className="w-full border border-black px-4 py-3 text-[10px] font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all" />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Manager
-                                        </label>
-                                        <Input {...register('manager')} />
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Manager</label>
+                                        <input {...register('manager')} className="w-full border border-black px-4 py-3 text-[10px] font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all" />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Work Location
-                                        </label>
-                                        <Input {...register('workLocation')} />
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Work Location</label>
+                                        <input {...register('workLocation')} className="w-full border border-black px-4 py-3 text-[10px] font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all" />
                                     </div>
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     )}
 
                     {/* About Section */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>About</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
+                    <div className="border border-black bg-white shadow-[8px_8px_0_0_#000]">
+                        <div className="px-8 py-4 border-b border-black bg-gray-50">
+                            <h2 className="text-sm font-black uppercase tracking-widest italic">ABOUT_SECTION</h2>
+                        </div>
+                        <div className="p-8 space-y-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    About
-                                </label>
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">About</label>
                                 <textarea
                                     {...register('about')}
                                     rows={4}
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none"
+                                    className="w-full border border-black px-4 py-3 text-[10px] font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all"
                                     placeholder="Tell us about yourself..."
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    What I love about my job
-                                </label>
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">What I love about my job</label>
                                 <textarea
                                     {...register('jobLoves')}
                                     rows={3}
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none"
+                                    className="w-full border border-black px-4 py-3 text-[10px] font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all"
                                     placeholder="What do you love about your job?"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    My interests and hobbies
-                                </label>
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">My interests and hobbies</label>
                                 <textarea
                                     {...register('interestsHobbies')}
                                     rows={3}
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none"
+                                    className="w-full border border-black px-4 py-3 text-[10px] font-black uppercase outline-none shadow-[2px_2px_0_0_#000] focus:shadow-none transition-all"
                                     placeholder="Share your interests and hobbies..."
                                 />
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
                     <div className="flex gap-4">
-                        <Button type="submit" loading={saving} variant="primary">
-                            Save Changes
-                        </Button>
-                        <Button
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="flex-1 bg-black text-white text-[10px] font-black py-4 border border-black uppercase tracking-[0.2em] shadow-[4px_4px_0_0_#000] hover:bg-gray-900 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all disabled:opacity-50"
+                        >
+                            {saving ? 'Saving...' : 'SAVE CHANGES'}
+                        </button>
+                        <button
                             type="button"
                             onClick={() => router.back()}
-                            variant="secondary"
+                            className="flex-1 bg-white text-black text-[10px] font-black py-4 border border-black uppercase tracking-[0.2em] hover:bg-gray-100 transition-all"
                         >
-                            Cancel
-                        </Button>
+                            CANCEL
+                        </button>
                     </div>
                 </form>
-            </div>
-        </DashboardLayout>
+            </main>
+        </div>
     );
 }
 
