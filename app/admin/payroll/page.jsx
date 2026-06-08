@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { UserAvatar } from '@/components/ui/user-avatar';
-import { NotificationBell } from '@/components/ui/notification-bell';
+import { AdminSidebar } from '@/components/admin/admin-sidebar';
 
 export default function AdminPayrollPage() {
     const { data: session } = useSession();
@@ -115,60 +114,21 @@ export default function AdminPayrollPage() {
     );
 
     return (
-        <div className="min-h-screen bg-white">
-            {/* Lined Top Navigation */}
-            <nav className="bg-white border-b border-black">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-20">
-                        <div className="flex items-center gap-12">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 border border-black flex items-center justify-center overflow-hidden bg-white font-black text-xs uppercase">
-                                    {session?.user?.companyLogo ? (
-                                        <img src={session.user.companyLogo} alt="Logo" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <span className="text-black font-black italic">LOGO</span>
-                                    )}
-                                </div>
-                                <div>
-                                    <h1 className="text-2xl font-black text-black tracking-tighter uppercase leading-none">
-                                        Dayflow
-                                    </h1>
-                                    <p className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-[0.2em] mt-1">
-                                        ADMIN CONTROL PORTAL
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="flex border border-black bg-white overflow-hidden shadow-[2px_2px_0_0_#000]">
-                                <Link href="/admin" className="px-8 py-3 text-[10px] font-black uppercase tracking-widest text-black border-r border-black hover:bg-gray-100 transition-colors">
-                                    Employees
-                                </Link>
-                                <Link href="/admin/attendance" className="px-8 py-3 text-[10px] font-black uppercase tracking-widest text-black border-r border-black hover:bg-gray-100 transition-colors">
-                                    Attendance
-                                </Link>
-                                <Link href="/admin/time-off" className="px-8 py-3 text-[10px] font-black uppercase tracking-widest text-black border-r border-black hover:bg-gray-100 transition-colors">
-                                    Time Off
-                                </Link>
-                                <Link href="/admin/payroll" className="px-8 py-3 text-[10px] font-black uppercase tracking-widest text-white bg-black hover:bg-gray-900 transition-colors">
-                                    Payroll
-                                </Link>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                            <NotificationBell />
-                            <UserAvatar />
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="min-h-screen flex">
+            <AdminSidebar />
+            <main className="flex-1 ml-64 p-8" style={{
+                backgroundImage: `
+                    linear-gradient(to right, #e5e5e5 1px, transparent 1px),
+                    linear-gradient(to bottom, #e5e5e5 1px, transparent 1px)
+                `,
+                backgroundSize: '40px 40px',
+                backgroundColor: '#fafafa'
+            }}>
                 <div className="mb-8 border border-black p-8 bg-white shadow-[8px_8px_0_0_#000]">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                         <div>
                             <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] font-mono italic mb-2">Payroll Execution Core</h2>
-                            <p className="text-2xl font-black text-black uppercase tracking-tight">Financial Governance</p>
+                            <p className="text-2xl font-black text-black uppercase tracking-tight underline underline-offset-8 decoration-4 decoration-blue-500">Financial Governance</p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
