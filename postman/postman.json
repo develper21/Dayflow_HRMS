@@ -1,0 +1,1368 @@
+{
+	"info": {
+		"_postman_id": "b7e3a1c2-9f4d-4e8a-a5b6-1c2d3e4f5a6b",
+		"name": "DayFlow HRMS API",
+		"description": "# 📋 DayFlow HRMS — Complete API Collection\n\nComplete collection of **all API routes** in the DayFlow Human Resource Management System (Next.js App Router).\n\n---\n\n## 🔀 Collection Structure\n\nThe collection is divided into **two sides**:\n\n| Section | Purpose |\n|---|---|\n| 🏥 **Health Check** | Server & database connectivity tests |\n| 🔐 **Authentication** | Signup, email verification, login (NextAuth), session |\n| 🛠️ **Server Side — Admin APIs** | Admin-only endpoints (dashboard, employees, salary) |\n| 👤 **Frontend Side — Employee APIs** | Endpoints consumed by employee dashboard (profile, attendance, leaves, payroll, notifications) |\n| 🎯 **Performance & Training** | Reviews, training catalog & enrollments |\n| 📢 **Recruitment** | Job postings & applications (admin) |\n| 📊 **Analytics & Reports** | Dashboards, trends and report generation |\n| 📤 **Uploads** | File upload (logo / profile) |\n\n---\n\n## 🚀 How to Use\n\n1. Import this file into **Postman** (Import → File → `postman.json`).\n2. Set the `baseUrl` collection variable (default `http://localhost:3000`).\n3. Set `adminEmail` / `adminPassword` and `employeeEmail` / `employeePassword` variables with real accounts.\n4. Run **Auth → Get CSRF Token** then **Auth → Login (Admin)** — Postman saves the `next-auth.session-token` cookie automatically and every following request is authenticated.\n\n> ⚠️ **Note:** Login uses NextAuth's credentials flow. You must call **Get CSRF Token** first (it stores `csrfToken` + cookies), then **Login**. After that, all protected routes work.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "dayflow-hrms"
+	},
+	"item": [
+		{
+			"name": "🏥 Health Check",
+			"item": [
+				{
+					"name": "Prisma Connection Test",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/test/prisma",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "test", "prisma"]
+						},
+						"description": "Tests the Prisma → PostgreSQL connection. Returns total users, companies, profiles count and sample data. **Auth: Public**"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🔐 Authentication",
+			"item": [
+				{
+					"name": "HR Signup (Company + Admin User)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const json = pm.response.json();",
+									"if (json.verificationUrl) {",
+									"    const token = json.verificationUrl.split('token=')[1];",
+									"    pm.collectionVariables.set('verificationToken', token);",
+									"    console.log('Verification token saved:', token);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"companyName\": \"Acme Corp\",\n    \"name\": \"Narvin Sharma\",\n    \"email\": \"{{adminEmail}}\",\n    \"phone\": \"9876543210\",\n    \"password\": \"{{adminPassword}}\",\n    \"confirmPassword\": \"{{adminPassword}}\",\n    \"companyLogo\": \"/uploads/logos/logo.png\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signup",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "signup"]
+						},
+						"description": "Creates a new **Company + HR (ADMIN) user** in one transaction.\n\n**Validation (Zod):**\n- `companyName` min 2 chars (must be unique)\n- `name` min 2 chars\n- `email` valid & unique\n- `phone` exactly 10 digits\n- `password` min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char\n- `confirmPassword` must match\n\n**Success `201`:** returns user + company. In development also returns `verificationUrl` (token auto-saved to collection variable).\n**Auth: Public**"
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Email",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/verify-email?token={{verificationToken}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "verify-email"],
+							"query": [
+								{
+									"key": "token",
+									"value": "{{verificationToken}}",
+									"description": "Verification token from signup response (valid 24h)"
+								}
+							]
+						},
+						"description": "Verifies a user's email using the token.\n\n- `400` — token missing / invalid / expired\n- `200` — verified (or already verified)\n\n**Auth: Public**"
+					},
+					"response": []
+				},
+				{
+					"name": "Get CSRF Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const json = pm.response.json();",
+									"pm.collectionVariables.set('csrfToken', json.csrfToken);",
+									"console.log('CSRF token saved:', json.csrfToken);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/csrf",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "csrf"]
+						},
+						"description": "NextAuth CSRF endpoint. Saves `csrfToken` to collection variables and sets the `next-auth.csrf-token` cookie. **Run this before Login.**"
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 302) {",
+									"    console.log('✅ Admin logged in — session cookie saved automatically');",
+									"} else {",
+									"    console.log('❌ Login failed:', pm.response.text());",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{ "key": "csrfToken", "value": "{{csrfToken}}", "type": "text" },
+								{ "key": "email", "value": "{{adminEmail}}", "type": "text", "description": "Email OR Employee ID (e.g. ACM0001) — both work" },
+								{ "key": "password", "value": "{{adminPassword}}", "type": "text" },
+								{ "key": "json", "value": "true", "type": "text" }
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/callback/credentials",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "callback", "credentials"]
+						},
+						"description": "NextAuth **credentials login**. Accepts email **or** employeeId as `email` field.\n\nSets `next-auth.session-token` cookie (JWT, 30 days) — Postman stores it automatically for the domain.\n\n**Errors:** `Invalid login credentials`, `Please verify your email before logging in`."
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Employee)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{ "key": "csrfToken", "value": "{{csrfToken}}", "type": "text" },
+								{ "key": "email", "value": "{{employeeEmail}}", "type": "text" },
+								{ "key": "password", "value": "{{employeePassword}}", "type": "text" },
+								{ "key": "json", "value": "true", "type": "text" }
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/callback/credentials",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "callback", "credentials"]
+						},
+						"description": "Same credentials flow, but for an EMPLOYEE account. Re-run **Get CSRF Token** before this if switching accounts."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Session",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/session",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "session"]
+						},
+						"description": "Returns the current session: `id, name, email, role (ADMIN/EMPLOYEE), employeeId, companyId, companyName, companyLogo`. Returns `{}` when not logged in."
+					},
+					"response": []
+				},
+				{
+					"name": "Sign Out",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{ "key": "csrfToken", "value": "{{csrfToken}}", "type": "text" },
+								{ "key": "json", "value": "true", "type": "text" }
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signout",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "signout"]
+						},
+						"description": "Destroys the current session."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🛠️ Server Side — Admin APIs",
+			"item": [
+				{
+					"name": "Admin Dashboard Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/dashboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "dashboard"]
+						},
+						"description": "Dashboard summary for the admin's company.\n\n**Returns:** `stats` — `totalEmployees, presentToday, onLeave, pendingLeaves, absentToday` + `recentEmployees` (last 5).\n**Auth: ADMIN only**"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Employees",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/employees",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "employees"]
+						},
+						"description": "Lists all EMPLOYEE users of the admin's company, newest first — includes `profile`, `jobDetails`, `salaryStructure`.\n**Auth: ADMIN only**"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Employee",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const json = pm.response.json();",
+									"if (json.employee) {",
+									"    pm.collectionVariables.set('employeeUserId', json.employee.id);",
+									"    pm.collectionVariables.set('newEmployeeId', json.employee.employeeId);",
+									"    pm.collectionVariables.set('newEmployeePassword', json.employee.password);",
+									"    console.log('✅ Employee saved:', json.employee.employeeId, '| temp password:', json.employee.password);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Ravi\",\n    \"lastName\": \"Kumar\",\n    \"email\": \"{{newEmployeeEmail}}\",\n    \"phone\": \"9876543211\",\n    \"dateOfBirth\": \"1998-05-14\",\n    \"gender\": \"MALE\",\n    \"maritalStatus\": \"SINGLE\",\n    \"nationality\": \"Indian\",\n    \"residingAddress\": \"MG Road, Indore, MP\",\n    \"jobPosition\": \"Software Engineer\",\n    \"department\": \"Engineering\",\n    \"manager\": \"Narvin Sharma\",\n    \"workLocation\": \"Indore Office\",\n    \"dateOfJoining\": \"2026-09-01\",\n    \"accountNumber\": \"1234567890\",\n    \"bankName\": \"HDFC Bank\",\n    \"ifscCode\": \"HDFC0001234\",\n    \"panNumber\": \"ABCDE1234F\",\n    \"uanNumber\": \"101234567890\",\n    \"monthlyWage\": 55000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/employees",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "employees"]
+						},
+						"description": "Creates an employee + profile + job details + (optional) salary structure in one transaction.\n\n**Required:** `firstName, lastName, email, jobPosition, department, dateOfJoining`\n\n**Auto-generated:**\n- `employeeId` (e.g. `RAV0001` format based on name+year)\n- random password (returned once in response)\n\n**Success `201`** → employee `id` saved to `{{employeeUserId}}`.\n**Auth: ADMIN only**"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Employee",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/employees/{{employeeUserId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "employees", "{{employeeUserId}}"]
+						},
+						"description": "Full employee record — company, profile, jobDetails, salaryStructure, documents.\n\n**Access:** ADMIN (any employee) or the employee themselves."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Employee",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Ravi K Kumar\",\n    \"phone\": \"9998887776\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/employees/{{employeeUserId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "employees", "{{employeeUserId}}"]
+						},
+						"description": "Directly updates the `User` record with the given body fields.\n**Access:** ADMIN or the employee themselves."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Employee",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/employees/{{employeeUserId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "employees", "{{employeeUserId}}"]
+						},
+						"description": "Deletes the employee. All related records cascade-delete.\n**Auth: ADMIN only** ⚠️ Destructive"
+					},
+					"response": []
+				},
+				{
+					"name": "Save Salary Structure",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"monthlyWage\": 55000,\n    \"yearlyWage\": 660000,\n    \"workingDaysPerWeek\": 5,\n    \"basicSalary\": 27500,\n    \"basicSalaryPercent\": 50,\n    \"houseRentAllowance\": 11000,\n    \"hraPercent\": 20,\n    \"standardAllowance\": 8250,\n    \"performanceBonus\": 2750,\n    \"performanceBonusPercent\": 5,\n    \"leaveTravelAllowance\": 2750,\n    \"ltaPercent\": 5,\n    \"fuelAllowance\": 2750,\n    \"employeePF\": 1800,\n    \"employeePFPercent\": 12,\n    \"employerPF\": 1800,\n    \"employerPFPercent\": 12,\n    \"professionalTax\": 200\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/employees/{{employeeUserId}}/salary",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "employees", "{{employeeUserId}}", "salary"]
+						},
+						"description": "**Upsert** the full salary structure for an employee (creates it if missing).\n\nComponents: basic, HRA, standard allowance, performance bonus, LTA, fuel, PF (employee/employer), professional tax.\n**Auth: ADMIN only**"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "👤 Frontend Side — Employee APIs",
+			"item": [
+				{
+					"name": "Profile",
+					"item": [
+						{
+							"name": "Get My Profile",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/profile/{{employeeUserId}}",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "profile", "{{employeeUserId}}"]
+								},
+								"description": "Returns `user`, `profile`, `jobDetails`, `salaryStructure`, `documents`.\n\n**Access:** own profile for employees, any profile for ADMIN. `403` otherwise."
+							},
+							"response": []
+						},
+						{
+							"name": "Update My Profile",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{ "key": "Content-Type", "value": "application/json" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"phone\": \"9876543210\",\n    \"dateOfBirth\": \"1998-05-14\",\n    \"gender\": \"MALE\",\n    \"maritalStatus\": \"SINGLE\",\n    \"nationality\": \"Indian\",\n    \"personalEmail\": \"ravi.personal@gmail.com\",\n    \"residingAddress\": \"MG Road, Indore, MP 452001\",\n    \"about\": \"Full-stack developer who loves clean code\",\n    \"jobLoves\": \"Building products, mentoring juniors\",\n    \"interestsHobbies\": \"Cricket, chess, trekking\",\n    \"panNumber\": \"ABCDE1234F\",\n    \"uanNumber\": \"101234567890\",\n    \"bankName\": \"HDFC Bank\",\n    \"accountNumber\": \"1234567890\",\n    \"ifscCode\": \"HDFC0001234\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/profile/{{employeeUserId}}",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "profile", "{{employeeUserId}}"]
+								},
+								"description": "Updates profile + job details (upsert). All fields optional.\n\n- Employees can update **everything except** `name`, `jobPosition`, `department`, `manager`, `workLocation`\n- ADMIN can also update those (admin-only fields)\n- `phone` must be 10 digits, `personalEmail` must be valid email (Zod)\n\n**Auth: self or ADMIN**"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Attendance",
+					"item": [
+						{
+							"name": "Check In",
+							"request": {
+								"method": "POST",
+								"header": [
+									{ "key": "Content-Type", "value": "application/json" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"action\": \"checkin\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/attendance",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "attendance"]
+								},
+								"description": "Marks today's check-in (status becomes `PRESENT`).\n\n`400` — `Already checked in today` if repeated.\n**Auth: any logged-in user**"
+							},
+							"response": []
+						},
+						{
+							"name": "Check Out",
+							"request": {
+								"method": "POST",
+								"header": [
+									{ "key": "Content-Type", "value": "application/json" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"action\": \"checkout\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/attendance",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "attendance"]
+								},
+								"description": "Marks today's check-out.\n\n`400` — `Please check in first` / `Already checked out today`.\n**Auth: any logged-in user**"
+							},
+							"response": []
+						},
+						{
+							"name": "Today's Status (Check-in State)",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/attendance?statusOnly=true",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "attendance"],
+									"query": [
+										{ "key": "statusOnly", "value": "true", "description": "Returns only today's checkedIn/checkedOut flags" }
+									]
+								},
+								"description": "Lightweight status used by the dashboard check-in widget: `{ checkedIn, checkedOut, attendance }`.\n**Auth: any logged-in user**"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Attendance Records",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/attendance?userId=&date=2026-09-30&search=ravi",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "attendance"],
+									"query": [
+										{ "key": "userId", "value": "", "description": "Filter by user (employees can only pass their own id)" },
+										{ "key": "date", "value": "2026-09-30", "description": "YYYY-MM-DD — filter a single day" },
+										{ "key": "search", "value": "ravi", "description": "ADMIN only — search by employee name or employeeId" }
+									]
+								},
+								"description": "Attendance list with computed `workHours` and `extraHours` (hours beyond 8 = overtime).\n\n- Employees: only their own records\n- ADMIN: all company records (optional `userId`, `date`, `search` filters)\n\n**Auth: any logged-in user**"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Leaves",
+					"item": [
+						{
+							"name": "Get Leave Requests",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/leaves?userId=",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "leaves"],
+									"query": [
+										{ "key": "userId", "value": "", "description": "ADMIN only — filter by employee" }
+									]
+								},
+								"description": "Leave requests, newest first, includes employee `name` + `employeeId`.\n\n- Employees: own requests only\n- ADMIN: all company requests (optionally filtered by `userId`)\n\n**Auth: any logged-in user**"
+							},
+							"response": []
+						},
+						{
+							"name": "Apply For Leave",
+							"request": {
+								"method": "POST",
+								"header": [
+									{ "key": "Content-Type", "value": "application/json" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"type\": \"SICK\",\n    \"startDate\": \"2026-10-05\",\n    \"endDate\": \"2026-10-06\",\n    \"reason\": \"Fever and cold\",\n    \"attachmentUrl\": \"/uploads/documents/medical-note.pdf\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/leaves",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "leaves"]
+								},
+								"description": "Creates a leave request (`status: PENDING`).\n\n**Required:** `type` (PAID / SICK / UNPAID), `startDate`, `endDate`\n**Optional:** `reason`, `attachmentUrl`\n\n`days` is auto-calculated. All company ADMINs get a `LEAVE_REQUEST` notification.\n**Auth: any logged-in user**"
+							},
+							"response": []
+						},
+						{
+							"name": "Approve / Reject Leave",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{ "key": "Content-Type", "value": "application/json" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{leaveRequestId}}\",\n    \"status\": \"APPROVED\",\n    \"adminComment\": \"Get well soon!\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/leaves",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "leaves"]
+								},
+								"description": "Approve or reject a leave request.\n\n**Body:** `id` (required), `status` (`APPROVED` / `REJECTED`), `adminComment` (optional)\n\nThe employee receives a `LEAVE_UPDATE` notification.\n**Auth: ADMIN only**"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Payroll",
+					"item": [
+						{
+							"name": "Get Payroll Records",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/payroll?userId=",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "payroll"],
+									"query": [
+										{ "key": "userId", "value": "", "description": "ADMIN only — filter by employee" }
+									]
+								},
+								"description": "Payroll history sorted newest month first.\n\n- Employees: own payslips\n- ADMIN: whole company (optional `userId` filter)\n\n**Auth: any logged-in user**"
+							},
+							"response": []
+						},
+						{
+							"name": "Generate / Update Payroll",
+							"request": {
+								"method": "POST",
+								"header": [
+									{ "key": "Content-Type", "value": "application/json" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userId\": \"{{employeeUserId}}\",\n    \"month\": 9,\n    \"year\": 2026,\n    \"status\": \"PAID\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/payroll",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "payroll"]
+								},
+								"description": "Generates (or re-generates) a month's payslip — **upsert** on `(userId, month, year)`.\n\nAmounts are calculated from the employee's salary structure:\n```\nallowances = HRA + standardAllowance + fuelAllowance\ndeductions = employeePF + professionalTax\nnetSalary  = basicSalary + allowances − deductions\n```\n\n`404` if the employee has no salary structure.\n**Auth: ADMIN only**"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Notifications",
+					"item": [
+						{
+							"name": "Get My Notifications",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/notifications?page=1&limit=20&unreadOnly=false",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "notifications"],
+									"query": [
+										{ "key": "page", "value": "1" },
+										{ "key": "limit", "value": "20" },
+										{ "key": "unreadOnly", "value": "false", "description": "true → only unread" }
+									]
+								},
+								"description": "Paginated notifications for the logged-in user + `unreadCount`.\n**Auth: any logged-in user**"
+							},
+							"response": []
+						},
+						{
+							"name": "Send Notification (Admin)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{ "key": "Content-Type", "value": "application/json" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userId\": \"{{employeeUserId}}\",\n    \"type\": \"ANNOUNCEMENT\",\n    \"title\": \"Town Hall Meeting\",\n    \"message\": \"Company town hall this Friday at 4 PM.\",\n    \"priority\": \"HIGH\",\n    \"category\": \"SYSTEM\",\n    \"actionUrl\": \"/dashboard/notifications\",\n    \"actionText\": \"View Details\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/notifications",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "notifications"]
+								},
+								"description": "Creates a notification for a user (goes through NotificationService — email/push/SMS flags set).\n\n**Required:** `userId, type, title, message`\n**Optional:** `priority` (LOW/NORMAL/HIGH/URGENT), `category` (SYSTEM/EMAIL/PUSH/SMS), `actionUrl`, `actionText`\n\n**Auth: ADMIN only**"
+							},
+							"response": []
+						},
+						{
+							"name": "Mark One As Read",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{ "key": "Content-Type", "value": "application/json" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"{{notificationId}}\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/notifications",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "notifications"]
+								},
+								"description": "Marks a single notification as read.\n**Auth: any logged-in user**"
+							},
+							"response": []
+						},
+						{
+							"name": "Mark All As Read",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{ "key": "Content-Type", "value": "application/json" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"markAll\": true\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/notifications",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "notifications"]
+								},
+								"description": "Marks **all** of the current user's notifications as read.\n**Auth: any logged-in user**"
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "🎯 Performance & Training",
+			"item": [
+				{
+					"name": "Get Performance Reviews",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/performance?page=1&limit=20&status=SUBMITTED",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "performance"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "20" },
+								{ "key": "userId", "value": "", "description": "ADMIN only — filter by employee" },
+								{ "key": "reviewPeriod", "value": "", "description": "e.g. Q3-2026, ANNUAL-2026" },
+								{ "key": "reviewType", "value": "", "description": "QUARTERLY / ANNUAL / PROBATION" },
+								{ "key": "status", "value": "SUBMITTED", "description": "DRAFT / SUBMITTED / APPROVED / REJECTED" }
+							]
+						},
+						"description": "Paginated performance reviews with employee info.\n- Employees always see only their own reviews\n- ADMIN sees all (with filters)\n\n**Auth: any logged-in user**"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Performance Review",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"{{employeeUserId}}\",\n    \"reviewPeriod\": \"Q3-2026\",\n    \"reviewType\": \"QUARTERLY\",\n    \"qualityRating\": 4.5,\n    \"quantityRating\": 4,\n    \"teamworkRating\": 5,\n    \"initiativeRating\": 4,\n    \"attendanceRating\": 4.5,\n    \"strengths\": \"Great problem solving and ownership\",\n    \"weaknesses\": \"Needs to improve documentation\",\n    \"goals\": \"Lead a module end-to-end next quarter\",\n    \"recommendations\": \"Enroll in advanced Node.js training\",\n    \"employeeComments\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/performance",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "performance"]
+						},
+						"description": "Creates a review. `overallRating` auto-averages the 5 ratings if not provided.\n\n- ADMIN creating for others → `status: DRAFT`\n- Employee creating for self → `status: SUBMITTED`\n- Employee cannot create for someone else (`401`)\n\n**Auth: any logged-in user**"
+					},
+					"response": []
+				},
+				{
+					"name": "Review Performance (Approve/Reject)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"{{reviewId}}\",\n    \"status\": \"APPROVED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/performance",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "performance"]
+						},
+						"description": "Updates review `status` (DRAFT/SUBMITTED/APPROVED/REJECTED); stamps `reviewedBy` + `reviewedAt`.\n\n**Body:** `id`, `status` (both required), `reviewedBy` (optional).\n**Auth: ADMIN only**"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Trainings (Catalog)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/training?category=TECHNICAL&status=ONGOING",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "training"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "20" },
+								{ "key": "category", "value": "TECHNICAL", "description": "TECHNICAL / SOFT_SKILLS / COMPLIANCE / SAFETY" },
+								{ "key": "status", "value": "ONGOING", "description": "PLANNED / ONGOING / COMPLETED / CANCELLED" }
+							]
+						},
+						"description": "Training catalog with enrollments + enrolled users.\n**Auth: ADMIN only** (employees use *Get My Enrollments*)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Enrollments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/training?enrollments=true&status=IN_PROGRESS",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "training"],
+							"query": [
+								{ "key": "enrollments", "value": "true", "description": "Switches to enrollment mode (own enrollments)" },
+								{ "key": "status", "value": "IN_PROGRESS", "description": "ENROLLED / IN_PROGRESS / COMPLETED / DROPPED" }
+							]
+						},
+						"description": "The logged-in employee's training enrollments, includes full training details.\n**Auth: any logged-in user**"
+					},
+					"response": []
+				},
+				{
+					"name": "Enroll In Training",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"enroll\",\n    \"trainingId\": \"{{trainingId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/training",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "training"]
+						},
+						"description": "Enrolls the current user (`status: ENROLLED`). `400 Already enrolled` if repeated.\n**Auth: any logged-in user**"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Training",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"create\",\n    \"title\": \"Advanced React Patterns\",\n    \"description\": \"Deep dive into performance, suspense and server components.\",\n    \"category\": \"TECHNICAL\",\n    \"duration\": 12,\n    \"cost\": 4999,\n    \"instructor\": \"Aditi Verma\",\n    \"startDate\": \"2026-10-10\",\n    \"endDate\": \"2026-10-20\",\n    \"status\": \"PLANNED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/training",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "training"]
+						},
+						"description": "Creates a training program. `id` of the created training is in the response (save as `{{trainingId}}`).\n**Auth: ADMIN only**"
+					},
+					"response": []
+				},
+				{
+					"name": "Update My Progress",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"update_progress\",\n    \"id\": \"{{enrollmentId}}\",\n    \"progress\": 75,\n    \"status\": \"IN_PROGRESS\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/training",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "training"]
+						},
+						"description": "Updates enrollment `progress` (0-100), optional `score`. Setting `status: COMPLETED` also stamps `completedAt`.\n**Auth: any logged-in user (own enrollment)**"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Training Details",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"update_training\",\n    \"id\": \"{{trainingId}}\",\n    \"status\": \"ONGOING\",\n    \"instructor\": \"Aditi Verma\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/training",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "training"]
+						},
+						"description": "Updates any training field (title, dates, status, instructor...).\n**Auth: ADMIN only**"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📢 Recruitment",
+			"item": [
+				{
+					"name": "Get Job Postings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/recruitment?status=ACTIVE&department=Engineering",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "recruitment"],
+							"query": [
+								{ "key": "type", "value": "postings", "description": "postings (default) or applications" },
+								{ "key": "status", "value": "ACTIVE", "description": "ACTIVE / CLOSED / DRAFT" },
+								{ "key": "department", "value": "Engineering" }
+							]
+						},
+						"description": "Job postings with application counts, newest first.\n**Auth: ADMIN only**"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Applications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/recruitment?type=applications&status=APPLIED",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "recruitment"],
+							"query": [
+								{ "key": "type", "value": "applications" },
+								{ "key": "status", "value": "APPLIED", "description": "APPLIED / SCREENING / INTERVIEW / OFFER / REJECTED" }
+							]
+						},
+						"description": "Job applications with their posting, newest first.\n**Auth: ADMIN only**"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Job Posting",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"create_posting\",\n    \"title\": \"Senior Frontend Engineer\",\n    \"description\": \"Own the Next.js frontend of our HR platform.\",\n    \"department\": \"Engineering\",\n    \"location\": \"Indore (Hybrid)\",\n    \"employmentType\": \"FULL_TIME\",\n    \"experienceLevel\": \"SENIOR\",\n    \"salaryRange\": \"18-24 LPA\",\n    \"deadline\": \"2026-10-31\",\n    \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/recruitment",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "recruitment"]
+						},
+						"description": "Creates a job posting (`postedBy` = current admin). Save response `id` as `{{postingId}}`.\n**Auth: ADMIN only**"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Application",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"create_application\",\n    \"jobPostingId\": \"{{postingId}}\",\n    \"name\": \"Priya Singh\",\n    \"email\": \"priya.singh@example.com\",\n    \"phone\": \"9812345678\",\n    \"resumeUrl\": \"/uploads/documents/priya-resume.pdf\",\n    \"coverLetter\": \"I have 5 years of React experience and would love to join.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/recruitment",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "recruitment"]
+						},
+						"description": "Adds a candidate application to a posting (`status: APPLIED`). Save response `id` as `{{applicationId}}`.\n**Auth: ADMIN only** (public candidate portal planned)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Job Posting",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"update_posting\",\n    \"id\": \"{{postingId}}\",\n    \"status\": \"CLOSED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/recruitment",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "recruitment"]
+						},
+						"description": "Updates a posting (title, status, deadline, ...).\n**Auth: ADMIN only**"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Application (Move Stage)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"update_application\",\n    \"id\": \"{{applicationId}}\",\n    \"status\": \"INTERVIEW\",\n    \"notes\": \"Technical round scheduled for Oct 5\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/recruitment",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "recruitment"]
+						},
+						"description": "Moves an application through the pipeline: `APPLIED → SCREENING → INTERVIEW → OFFER` (or `REJECTED`). Stamps `reviewedBy` + `reviewedAt`.\n**Auth: ADMIN only**"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Posting / Application",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/recruitment?id={{applicationId}}&type=application",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "recruitment"],
+							"query": [
+								{ "key": "id", "value": "{{applicationId}}" },
+								{ "key": "type", "value": "application", "description": "posting or application" }
+							]
+						},
+						"description": "Deletes a posting or an application by query params.\n**Auth: ADMIN only** ⚠️ Destructive"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📊 Analytics & Reports",
+			"item": [
+				{
+					"name": "Dashboard Analytics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics?type=dashboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "analytics"],
+							"query": [
+								{ "key": "type", "value": "dashboard" }
+							]
+						},
+						"description": "Personal dashboard analytics (employees) / company dashboard (admins, optional `userId` filter)."
+					},
+					"response": []
+				},
+				{
+					"name": "Attendance Analytics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics?type=attendance&startDate=2026-09-01&endDate=2026-09-30",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "analytics"],
+							"query": [
+								{ "key": "type", "value": "attendance" },
+								{ "key": "startDate", "value": "2026-09-01" },
+								{ "key": "endDate", "value": "2026-09-30" }
+							]
+						},
+						"description": "Attendance trends for a date range (defaults: current user for employees, `userId` param for admins)."
+					},
+					"response": []
+				},
+				{
+					"name": "Payroll Analytics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics?type=payroll&month=9&year=2026",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "analytics"],
+							"query": [
+								{ "key": "type", "value": "payroll" },
+								{ "key": "month", "value": "9" },
+								{ "key": "year", "value": "2026" }
+							]
+						},
+						"description": "Payroll breakdown for a month/year."
+					},
+					"response": []
+				},
+				{
+					"name": "Leave Analytics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics?type=leave&startDate=2026-01-01&endDate=2026-12-31",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "analytics"],
+							"query": [
+								{ "key": "type", "value": "leave" },
+								{ "key": "startDate", "value": "2026-01-01" },
+								{ "key": "endDate", "value": "2026-12-31" }
+							]
+						},
+						"description": "Leave usage and balance analytics for a range."
+					},
+					"response": []
+				},
+				{
+					"name": "Employee Analytics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics?type=employees",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "analytics"],
+							"query": [
+								{ "key": "type", "value": "employees" }
+							]
+						},
+						"description": "Company-wide employee stats (headcount, departments, growth).\n**Auth: ADMIN only**"
+					},
+					"response": []
+				},
+				{
+					"name": "Performance Analytics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics?type=performance",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "analytics"],
+							"query": [
+								{ "key": "type", "value": "performance" }
+							]
+						},
+						"description": "Organization-wide performance review insights.\n**Auth: ADMIN only**"
+					},
+					"response": []
+				},
+				{
+					"name": "Training Analytics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics?type=training",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "analytics"],
+							"query": [
+								{ "key": "type", "value": "training" }
+							]
+						},
+						"description": "Training enrollment/completion stats.\n**Auth: ADMIN only**"
+					},
+					"response": []
+				},
+				{
+					"name": "Recruitment Analytics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics?type=recruitment",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "analytics"],
+							"query": [
+								{ "key": "type", "value": "recruitment" }
+							]
+						},
+						"description": "Pipeline funnel stats (postings, applications, conversions).\n**Auth: ADMIN only**"
+					},
+					"response": []
+				},
+				{
+					"name": "Trend Analytics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics?type=trends&trendType=attendance&period=monthly",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "analytics"],
+							"query": [
+								{ "key": "type", "value": "trends" },
+								{ "key": "trendType", "value": "attendance", "description": "attendance / payroll / leave ..." },
+								{ "key": "period", "value": "monthly", "description": "monthly / quarterly / yearly" }
+							]
+						},
+						"description": "Time-series trends for charts."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Reports",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/reports?page=1&limit=20&type=PAYROLL&status=COMPLETED",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "reports"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "20" },
+								{ "key": "type", "value": "PAYROLL", "description": "ATTENDANCE / PAYROLL / LEAVE / PERFORMANCE / CUSTOM" },
+								{ "key": "status", "value": "COMPLETED", "description": "GENERATING / COMPLETED / FAILED" }
+							]
+						},
+						"description": "Paginated generated reports.\n**Auth: any logged-in user**"
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Report",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const json = pm.response.json();",
+									"if (json.id) {",
+									"    pm.collectionVariables.set('reportId', json.id);",
+									"    console.log('Report saved:', json.id);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"September Payroll Summary\",\n    \"type\": \"PAYROLL\",\n    \"parameters\": {\n        \"month\": 9,\n        \"year\": 2026\n    },\n    \"format\": \"PDF\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/reports",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "reports"]
+						},
+						"description": "Generates a report via ReportService.\n\n**Required:** `name`, `type`\n**Optional:** `parameters` (JSON object), `format` (PDF / EXCEL / CSV, default PDF)\n\n**Auth: ADMIN only**"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Report",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/reports?id={{reportId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "reports"],
+							"query": [
+								{ "key": "id", "value": "{{reportId}}" }
+							]
+						},
+						"description": "Deletes a generated report.\n**Auth: ADMIN only**"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📤 Uploads",
+			"item": [
+				{
+					"name": "Upload File (logo / profile)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": [],
+									"description": "Choose any image/document file"
+								},
+								{
+									"key": "type",
+									"value": "logo",
+									"type": "text",
+									"description": "logo → saved to /public/uploads/logos, profile → /public/uploads/profiles"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/upload",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "upload"]
+						},
+						"description": "Uploads a file to `public/uploads/{type}/` with a unique timestamped filename.\n\n**Body (form-data):** `file` (required), `type` (`logo` or `profile`)\n**Returns:** `{ url: \"/uploads/logos/1696...png\" }` — use this URL in signup/profile.\n**Auth: any logged-in user**"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "adminEmail",
+			"value": "admin@acmecorp.com",
+			"type": "string"
+		},
+		{
+			"key": "adminPassword",
+			"value": "Admin@1234",
+			"type": "string"
+		},
+		{
+			"key": "employeeEmail",
+			"value": "ravi.kumar@acmecorp.com",
+			"type": "string"
+		},
+		{
+			"key": "employeePassword",
+			"value": "Employee@123",
+			"type": "string"
+		},
+		{
+			"key": "newEmployeeEmail",
+			"value": "ravi.kumar2@acmecorp.com",
+			"type": "string"
+		},
+		{
+			"key": "csrfToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "verificationToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "employeeUserId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "newEmployeeId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "newEmployeePassword",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "leaveRequestId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "notificationId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "reviewId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "trainingId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "enrollmentId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "postingId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "applicationId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "reportId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
