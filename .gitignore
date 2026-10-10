@@ -92,6 +92,7 @@ jspm_packages/
 *.swp
 *.swo
 *~
+.freebuff
 
 # OS
 .DS_Store
